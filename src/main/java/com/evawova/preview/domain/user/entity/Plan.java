@@ -6,6 +6,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Comment;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -13,44 +17,59 @@ import java.time.LocalDateTime;
 @Table(name = "plans")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Plan extends AggregateRoot<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Comment("플랜 고유 식별자")
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @Comment("플랜 타입 (FREE, PREMIUM)")
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Comment("플랜 타입 (FREE, PREMIUM)")
     private PlanType type;
 
     @Column(nullable = false)
+    @Comment("플랜 가격 (월 단위)")
     private Integer monthlyPrice;
 
     @Column(nullable = false)
+    @Comment("플랜 활성화 상태")
     private Integer annualPrice;
 
     @Column(nullable = false)
+    @Comment("플랜 저장 용량 (GB)")
     private Integer storageSizeGB;
 
     @Column(nullable = false)
+    @Comment("플랜 프로젝트 수")
     private Integer maxProjectCount;
 
     @Column(nullable = false)
+    @Comment("플랜 팀 협업 여부")
     private Boolean teamCollaboration;
 
     @Column(nullable = false)
+    @Comment("플랜 우선 지원 여부")
     private Boolean prioritySupport;
 
     @Column(nullable = false)
+    @Comment("플랜 커스텀 도메인 여부")
     private Boolean customDomain;
 
-    @Column(nullable = false)
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    @Comment("플랜 생성 시간")
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(nullable = false)
+    @Comment("플랜 정보 수정 시간")
     private LocalDateTime updatedAt;
 
     @PrePersist

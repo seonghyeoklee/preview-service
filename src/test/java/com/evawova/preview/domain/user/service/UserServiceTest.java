@@ -114,7 +114,7 @@ class UserServiceTest {
 
         // then
         assertThat(userDto.getEmail()).isEqualTo(testUser.getEmail());
-        assertThat(userDto.getName()).isEqualTo(testUser.getName());
+        assertThat(userDto.getName()).isEqualTo(testUser.getDisplayName());
     }
 
     @Test
@@ -140,7 +140,7 @@ class UserServiceTest {
 
         // then
         assertThat(userDto.getEmail()).isEqualTo(testUser.getEmail());
-        assertThat(userDto.getName()).isEqualTo(testUser.getName());
+        assertThat(userDto.getName()).isEqualTo(testUser.getDisplayName());
     }
 
     @Test
@@ -182,7 +182,7 @@ class UserServiceTest {
         User capturedUser = userCaptor.getValue();
         assertThat(capturedUser.getEmail()).isEqualTo(email);
         assertThat(capturedUser.getPassword()).isEqualTo(encodedPassword);
-        assertThat(capturedUser.getName()).isEqualTo(name);
+        assertThat(capturedUser.getDisplayName()).isEqualTo(name);
         assertThat(capturedUser.getPlan()).isEqualTo(freePlan);
         
         verify(eventPublisher).publishEvent(any(User.class));
@@ -198,7 +198,7 @@ class UserServiceTest {
         // when & then
         assertThatThrownBy(() -> userService.registerUser(email, "password", "Name"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("이미 등록된 이메일입니다");
+                .hasMessageContaining("이미 사용 중인 이메일입니다.");
     }
 
     @Test

@@ -20,7 +20,7 @@ public class UserDto {
         return UserDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .name(user.getName())
+                .name(user.getDisplayName())
                 .plan(PlanDto.fromEntity(user.getPlan()))
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
