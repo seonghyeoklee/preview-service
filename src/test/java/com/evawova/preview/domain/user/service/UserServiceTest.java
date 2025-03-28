@@ -1,5 +1,6 @@
 package com.evawova.preview.domain.user.service;
 
+import com.evawova.preview.domain.user.dto.SocialLoginRequest;
 import com.evawova.preview.domain.user.dto.UserDto;
 import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.PlanType;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +52,7 @@ class UserServiceTest {
     private Plan freePlan;
     private Plan standardPlan;
     private User testUser;
+    private SocialLoginRequest socialLoginRequest;
 
     @BeforeEach
     void setUp() {
@@ -66,8 +69,8 @@ class UserServiceTest {
                 false
         );
         standardPlan = Plan.createPlan(
-                "Standard",
-                PlanType.STANDARD,
+                "Premium",
+                PlanType.PREMIUM,
                 9900,
                 99000,
                 10,
@@ -84,6 +87,15 @@ class UserServiceTest {
                 "Test User",
                 freePlan
         );
+
+        socialLoginRequest = new SocialLoginRequest();
+        socialLoginRequest.setUid("123456789");
+        socialLoginRequest.setEmail("test@example.com");
+        socialLoginRequest.setDisplayName("Test User");
+        socialLoginRequest.setProvider(User.Provider.GOOGLE);
+        socialLoginRequest.setPhotoUrl("https://example.com/photo.jpg");
+        socialLoginRequest.setEmailVerified(true);
+        socialLoginRequest.setLastLoginAt(LocalDateTime.now());
     }
 
     @Test
@@ -114,7 +126,7 @@ class UserServiceTest {
 
         // then
         assertThat(userDto.getEmail()).isEqualTo(testUser.getEmail());
-        assertThat(userDto.getName()).isEqualTo(testUser.getDisplayName());
+        assertThat(userDto.getDisplayName()).isEqualTo(testUser.getDisplayName());
     }
 
     @Test
@@ -140,7 +152,7 @@ class UserServiceTest {
 
         // then
         assertThat(userDto.getEmail()).isEqualTo(testUser.getEmail());
-        assertThat(userDto.getName()).isEqualTo(testUser.getDisplayName());
+        assertThat(userDto.getDisplayName()).isEqualTo(testUser.getDisplayName());
     }
 
     @Test
@@ -207,10 +219,10 @@ class UserServiceTest {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(planRepository.findByType(PlanType.STANDARD)).thenReturn(Optional.of(standardPlan));
+        when(planRepository.findByType(PlanType.PREMIUM)).thenReturn(Optional.of(standardPlan));
 
         // when
-        UserDto userDto = userService.changePlan(userId, PlanType.STANDARD);
+        UserDto userDto = userService.changePlan(userId, PlanType.PREMIUM);
 
         // then
         assertThat(testUser.getPlan()).isEqualTo(standardPlan);
@@ -225,7 +237,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.STANDARD))
+        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.PREMIUM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("사용자를 찾을 수 없습니다");
     }
@@ -236,10 +248,10 @@ class UserServiceTest {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(planRepository.findByType(PlanType.STANDARD)).thenReturn(Optional.empty());
+        when(planRepository.findByType(PlanType.PREMIUM)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.STANDARD))
+        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.PREMIUM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("플랜을 찾을 수 없습니다");
     }
