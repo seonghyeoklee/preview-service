@@ -33,11 +33,11 @@ public class DataInitializer {
                 ));
             }
 
-            if (!planRepository.existsByType(PlanType.STANDARD)) {
+            if (!planRepository.existsByType(PlanType.PREMIUM)) {
                 // STANDARD 플랜
                 planRepository.save(Plan.createPlan(
-                        "Standard",
-                        PlanType.STANDARD,
+                        "Premium",
+                        PlanType.PREMIUM,
                         9900,   // 월 요금 9,900원
                         99000,  // 년 요금 99,000원
                         10,     // 10GB 스토리지
@@ -48,11 +48,11 @@ public class DataInitializer {
                 ));
             }
 
-            if (!planRepository.existsByType(PlanType.PRO)) {
+            if (!planRepository.existsByType(PlanType.ENTERPRISE)) {
                 // PRO 플랜
                 planRepository.save(Plan.createPlan(
-                        "Pro",
-                        PlanType.PRO,
+                        "Enterprise",
+                        PlanType.ENTERPRISE,
                         19900,  // 월 요금 19,900원
                         199000, // 년 요금 199,000원
                         100,    // 100GB 스토리지

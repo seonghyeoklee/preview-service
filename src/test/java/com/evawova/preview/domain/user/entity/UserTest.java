@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTest {
@@ -28,8 +30,8 @@ class UserTest {
                 false
         );
         standardPlan = Plan.createPlan(
-                "Standard",
-                PlanType.STANDARD,
+                "Premium",
+                PlanType.PREMIUM,
                 9900,
                 99000,
                 10,
@@ -73,6 +75,135 @@ class UserTest {
         UserPlanChangedEvent event = (UserPlanChangedEvent) user.getDomainEvents().get(0);
         assertThat(event.getEmail()).isEqualTo("test@example.com");
         assertThat(event.getOldPlanType()).isEqualTo(PlanType.FREE);
-        assertThat(event.getNewPlanType()).isEqualTo(PlanType.STANDARD);
+        assertThat(event.getNewPlanType()).isEqualTo(PlanType.PREMIUM);
+    }
+
+    @Test
+    @DisplayName("소셜 로그인으로 새로운 사용자를 생성할 수 있다")
+    void createSocialUser() {
+        // given
+        String uid = "123456789";
+        String email = "test@example.com";
+        String name = "Test User";
+        User.Provider provider = User.Provider.GOOGLE;
+
+        // when
+        User user = User.createSocialUser(uid, email, name, provider, freePlan);
+
+        // then
+        assertThat(user.getUid()).isEqualTo(uid);
+        assertThat(user.getEmail()).isEqualTo(email);
+        assertThat(user.getDisplayName()).isEqualTo(name);
+        assertThat(user.getProvider()).isEqualTo(provider);
+        assertThat(user.getPlan()).isEqualTo(freePlan);
+        assertThat(user.isActive()).isTrue();
+        assertThat(user.getPassword()).startsWith("SOCIAL_USER_");
+    }
+
+    @Test
+    @DisplayName("소셜 로그인 정보를 업데이트할 수 있다")
+    void updateSocialInfo() {
+        // given
+        User user = User.createSocialUser(
+            "123456789",
+            "test@example.com",
+            "Test User",
+            User.Provider.GOOGLE,
+            freePlan
+        );
+
+        String newName = "Updated Name";
+        User.Provider newProvider = User.Provider.APPLE;
+
+        // when
+        user.updateSocialInfo(newName, newProvider);
+
+        // then
+        assertThat(user.getDisplayName()).isEqualTo(newName);
+        assertThat(user.getProvider()).isEqualTo(newProvider);
+    }
+
+    @Test
+    @DisplayName("추가 정보를 업데이트할 수 있다")
+    void updateAdditionalInfo() {
+        // given
+        User user = User.createSocialUser(
+            "123456789",
+            "test@example.com",
+            "Test User",
+            User.Provider.GOOGLE,
+            freePlan
+        );
+
+        String newDisplayName = "New Display Name";
+        String photoUrl = "https://example.com/photo.jpg";
+        boolean isEmailVerified = true;
+        LocalDateTime lastLoginAt = LocalDateTime.now();
+
+        // when
+        user.updateAdditionalInfo(newDisplayName, photoUrl, isEmailVerified, lastLoginAt);
+
+        // then
+        assertThat(user.getDisplayName()).isEqualTo(newDisplayName);
+        assertThat(user.getPhotoUrl()).isEqualTo(photoUrl);
+        assertThat(user.isEmailVerified()).isTrue();
+        assertThat(user.getLastLoginAt()).isEqualTo(lastLoginAt);
+    }
+
+    @Test
+    @DisplayName("계정을 탈퇴할 수 있다")
+    void withdraw() {
+        // given
+        User user = User.createSocialUser(
+            "123456789",
+            "test@example.com",
+            "Test User",
+            User.Provider.GOOGLE,
+            freePlan
+        );
+
+        // when
+        user.withdraw();
+
+        // then
+        assertThat(user.isActive()).isFalse();
+        assertThat(user.getEmail()).startsWith("withdrawn_");
+        assertThat(user.getDisplayName()).isEqualTo("탈퇴한 사용자");
+        assertThat(user.getPassword()).isNull();
+        assertThat(user.getProvider()).isNull();
+        assertThat(user.getPhotoUrl()).isNull();
+        assertThat(user.isEmailVerified()).isFalse();
+        assertThat(user.getLastLoginAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("플랜을 변경할 수 있다")
+    void changePlan() {
+        // given
+        User user = User.createSocialUser(
+            "123456789",
+            "test@example.com",
+            "Test User",
+            User.Provider.GOOGLE,
+            freePlan
+        );
+
+        Plan premiumPlan = Plan.createPlan(
+            "Premium Plan",
+            PlanType.PREMIUM,
+            10000,
+            100000,
+            100,
+            100,
+            true,
+            true,
+            true
+        );
+
+        // when
+        user.changePlan(premiumPlan);
+
+        // then
+        assertThat(user.getPlan()).isEqualTo(premiumPlan);
     }
 } 
