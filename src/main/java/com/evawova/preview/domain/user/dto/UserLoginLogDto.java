@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class UserLoginLogDto {
     private Long id;
     private Long userId;
-    private String userEmail;
     private String ipAddress;
+    private String userAgent;
     private String deviceType;
     private String browserInfo;
     private String osInfo;
@@ -23,18 +23,18 @@ public class UserLoginLogDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime loginAt;
 
-    public static UserLoginLogDto fromEntity(UserLoginLog loginLog) {
+    public static UserLoginLogDto fromEntity(UserLoginLog entity) {
         return UserLoginLogDto.builder()
-                .id(loginLog.getId())
-                .userId(loginLog.getUser() != null ? loginLog.getUser().getId() : null)
-                .userEmail(loginLog.getUser() != null ? loginLog.getUser().getEmail() : null)
-                .ipAddress(loginLog.getIpAddress())
-                .deviceType(loginLog.getDeviceType())
-                .browserInfo(loginLog.getBrowserInfo())
-                .osInfo(loginLog.getOsInfo())
-                .successful(loginLog.isSuccessful())
-                .failReason(loginLog.getFailReason())
-                .loginAt(loginLog.getLoginAt())
+                .id(entity.getId())
+                .userId(entity.getUser().getId())
+                .ipAddress(entity.getIpAddress())
+                .userAgent(entity.getUserAgent())
+                .deviceType(entity.getDeviceType())
+                .browserInfo(entity.getBrowserInfo())
+                .osInfo(entity.getOsInfo())
+                .successful(entity.isSuccessful())
+                .failReason(entity.getFailReason())
+                .loginAt(entity.getLoginAt())
                 .build();
     }
 } 

@@ -24,12 +24,3 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
-  api-docs:
-    path: /v3/api-docs
-  packages-to-scan: com.evawova.preview.controller 

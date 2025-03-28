@@ -2,8 +2,8 @@ package com.evawova.preview.domain.user.entity;
 
 public enum PlanType {
     FREE("Free"),
-    STANDARD("Standard"),
-    PRO("Pro");
+    PREMIUM("Premium"),
+    ENTERPRISE("Enterprise");
 
     private final String displayName;
 
