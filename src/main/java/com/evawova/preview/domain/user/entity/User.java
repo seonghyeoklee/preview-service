@@ -5,12 +5,13 @@ import com.evawova.preview.domain.user.event.UserCreatedEvent;
 import com.evawova.preview.domain.user.event.UserPlanChangedEvent;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +21,8 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class User extends AggregateRoot<Long> {
 
     @Id
@@ -49,6 +51,7 @@ public class User extends AggregateRoot<Long> {
     private Plan plan;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     @Comment("사용자의 로그인 기록 목록")
     private List<UserLoginLog> loginLogs = new ArrayList<>();
 
@@ -56,6 +59,12 @@ public class User extends AggregateRoot<Long> {
     @Column(nullable = false)
     @Comment("소셜 로그인 제공자 (GOOGLE, APPLE)")
     private Provider provider;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Comment("사용자 역할 (USER, ADMIN)")
+    @Builder.Default
+    private Role role = Role.USER;
 
     @Column(nullable = false)
     @Comment("계정 활성화 상태")
@@ -84,6 +93,10 @@ public class User extends AggregateRoot<Long> {
         GOOGLE, APPLE
     }
 
+    public enum Role {
+        USER, ADMIN
+    }
+
     // 생성 메서드
     public static User createUser(String email, String password, String name, Plan plan) {
         User user = new User();
@@ -91,6 +104,7 @@ public class User extends AggregateRoot<Long> {
         user.password = password;
         user.displayName = name;
         user.plan = plan;
+        user.role = Role.USER;
         user.createdAt = LocalDateTime.now();
         user.updatedAt = LocalDateTime.now();
         
@@ -118,6 +132,7 @@ public class User extends AggregateRoot<Long> {
         user.displayName = name;
         user.provider = provider;
         user.plan = plan;
+        user.role = Role.USER;
         user.createdAt = LocalDateTime.now();
         user.updatedAt = LocalDateTime.now();
         
@@ -152,6 +167,14 @@ public class User extends AggregateRoot<Long> {
         this.photoUrl = null;
         this.isEmailVerified = false;
         this.lastLoginAt = null;
+    }
+
+    public void setPlan(Plan plan) {
+        this.plan = plan;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override

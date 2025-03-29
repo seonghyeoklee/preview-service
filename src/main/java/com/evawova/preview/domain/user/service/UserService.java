@@ -44,6 +44,12 @@ public class UserService {
         return UserDto.fromEntity(user);
     }
 
+    public UserDto getUserByUid(String uid) {
+        User user = userRepository.findByUid(uid)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with uid: " + uid));
+        return UserDto.fromEntity(user);
+    }
+
     @Transactional
     public UserDto registerUser(String email, String password, String name) {
         // 이메일 중복 체크
@@ -133,5 +139,17 @@ public class UserService {
         
         // 사용자 탈퇴 처리
         user.withdraw();
+    }
+
+    public UserDto changeUserPlanByUid(String uid, PlanType planType) {
+        User user = userRepository.findByUid(uid)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + uid));
+        
+        Plan plan = planRepository.findByType(planType)
+                .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + planType));
+        
+        user.setPlan(plan);
+        User savedUser = userRepository.save(user);
+        return UserDto.fromEntity(savedUser);
     }
 } 

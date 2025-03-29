@@ -16,6 +16,7 @@ public class UserDto {
     private String displayName;
     private Plan plan;
     private User.Provider provider;
+    private User.Role role;
     private boolean active;
     private String photoUrl;
     private boolean isEmailVerified;
@@ -31,6 +32,7 @@ public class UserDto {
         dto.setDisplayName(user.getDisplayName());
         dto.setPlan(user.getPlan());
         dto.setProvider(user.getProvider());
+        dto.setRole(user.getRole());
         dto.setActive(user.isActive());
         dto.setPhotoUrl(user.getPhotoUrl());
         dto.setEmailVerified(user.isEmailVerified());
