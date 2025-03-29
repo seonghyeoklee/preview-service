@@ -14,17 +14,14 @@ class UserLoginLogTest {
     @BeforeEach
     void setUp() {
         freePlan = Plan.createPlan(
-            "Free Plan",
+            "Free",
             PlanType.FREE,
             0,
             0,
-            5,
-            3,
-            false,
-            false,
-            false
+            10000,
+            true
         );
-
+        
         user = User.createSocialUser(
             "123456789",
             "test@example.com",

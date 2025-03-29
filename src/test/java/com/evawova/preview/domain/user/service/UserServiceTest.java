@@ -26,8 +26,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +49,7 @@ class UserServiceTest {
 
     private Plan freePlan;
     private Plan standardPlan;
+    private Plan proPlan;
     private User testUser;
     private SocialLoginRequest socialLoginRequest;
 
@@ -62,22 +61,24 @@ class UserServiceTest {
                 PlanType.FREE,
                 0,
                 0,
-                1,
-                3,
-                false,
-                false,
-                false
+                10000,  // 10,000 토큰
+                true
         );
         standardPlan = Plan.createPlan(
-                "Premium",
-                PlanType.PREMIUM,
+                "Standard",
+                PlanType.STANDARD,
                 9900,
                 99000,
-                10,
-                10,
-                true,
-                false,
-                false
+                50000,  // 50,000 토큰
+                true
+        );
+        proPlan = Plan.createPlan(
+                "Pro",
+                PlanType.PRO,
+                19900,
+                199000,
+                100000, // 100,000 토큰
+                true
         );
 
         // 테스트를 위한 사용자 설정
@@ -219,10 +220,10 @@ class UserServiceTest {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(planRepository.findByType(PlanType.PREMIUM)).thenReturn(Optional.of(standardPlan));
+        when(planRepository.findByType(PlanType.STANDARD)).thenReturn(Optional.of(standardPlan));
 
         // when
-        UserDto userDto = userService.changePlan(userId, PlanType.PREMIUM);
+        UserDto userDto = userService.changePlan(userId, PlanType.STANDARD);
 
         // then
         assertThat(testUser.getPlan()).isEqualTo(standardPlan);
@@ -237,7 +238,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.PREMIUM))
+        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.STANDARD))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("사용자를 찾을 수 없습니다");
     }
@@ -248,10 +249,10 @@ class UserServiceTest {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(planRepository.findByType(PlanType.PREMIUM)).thenReturn(Optional.empty());
+        when(planRepository.findByType(PlanType.STANDARD)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.PREMIUM))
+        assertThatThrownBy(() -> userService.changePlan(userId, PlanType.STANDARD))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("플랜을 찾을 수 없습니다");
     }

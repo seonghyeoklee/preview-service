@@ -13,11 +13,8 @@ public class PlanDto {
     private PlanType type;
     private Integer monthlyPrice;
     private Integer annualPrice;
-    private Integer storageSizeGB;
-    private Integer maxProjectCount;
-    private Boolean teamCollaboration;
-    private Boolean prioritySupport;
-    private Boolean customDomain;
+    private Integer monthlyTokenLimit;
+    private boolean active;
 
     public static PlanDto fromEntity(Plan plan) {
         return PlanDto.builder()
@@ -26,11 +23,8 @@ public class PlanDto {
                 .type(plan.getType())
                 .monthlyPrice(plan.getMonthlyPrice())
                 .annualPrice(plan.getAnnualPrice())
-                .storageSizeGB(plan.getStorageSizeGB())
-                .maxProjectCount(plan.getMaxProjectCount())
-                .teamCollaboration(plan.getTeamCollaboration())
-                .prioritySupport(plan.getPrioritySupport())
-                .customDomain(plan.getCustomDomain())
+                .monthlyTokenLimit(plan.getMonthlyTokenLimit())
+                .active(plan.isActive())
                 .build();
     }
 } 
