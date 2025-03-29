@@ -23,22 +23,17 @@ class UserTest {
                 PlanType.FREE,
                 0,
                 0,
-                1,
-                3,
-                false,
-                false,
-                false
+                10000,
+                true
         );
+        
         standardPlan = Plan.createPlan(
-                "Premium",
-                PlanType.PREMIUM,
+                "Standard",
+                PlanType.STANDARD,
                 9900,
                 99000,
-                10,
-                10,
-                true,
-                false,
-                false
+                50000,
+                true
         );
     }
 
@@ -75,7 +70,7 @@ class UserTest {
         UserPlanChangedEvent event = (UserPlanChangedEvent) user.getDomainEvents().get(0);
         assertThat(event.getEmail()).isEqualTo("test@example.com");
         assertThat(event.getOldPlanType()).isEqualTo(PlanType.FREE);
-        assertThat(event.getNewPlanType()).isEqualTo(PlanType.PREMIUM);
+        assertThat(event.getNewPlanType()).isEqualTo(PlanType.STANDARD);
     }
 
     @Test
@@ -188,22 +183,10 @@ class UserTest {
             freePlan
         );
 
-        Plan premiumPlan = Plan.createPlan(
-            "Premium Plan",
-            PlanType.PREMIUM,
-            10000,
-            100000,
-            100,
-            100,
-            true,
-            true,
-            true
-        );
-
         // when
-        user.changePlan(premiumPlan);
+        user.changePlan(standardPlan);
 
         // then
-        assertThat(user.getPlan()).isEqualTo(premiumPlan);
+        assertThat(user.getPlan()).isEqualTo(standardPlan);
     }
 } 

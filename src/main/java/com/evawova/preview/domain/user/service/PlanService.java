@@ -1,7 +1,6 @@
 package com.evawova.preview.domain.user.service;
 
 import com.evawova.preview.domain.user.dto.PlanDto;
-import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.PlanType;
 import com.evawova.preview.domain.user.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +23,16 @@ public class PlanService {
                 .collect(Collectors.toList());
     }
 
-    public PlanDto getPlanByType(PlanType planType) {
-        Plan plan = planRepository.findByType(planType)
-                .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + planType));
-        return PlanDto.fromEntity(plan);
+    public PlanDto getPlanById(Long id) {
+        return planRepository.findById(id)
+                .map(PlanDto::fromEntity)
+                .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + id));
+    }
+
+    public PlanDto getPlanByType(PlanType type) {
+        return planRepository.findByType(type)
+                .map(PlanDto::fromEntity)
+                .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + type));
     }
 
     public PlanDto getFreePlan() {
