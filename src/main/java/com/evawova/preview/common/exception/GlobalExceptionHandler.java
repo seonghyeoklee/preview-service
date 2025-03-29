@@ -6,14 +6,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,19 @@ public class GlobalExceptionHandler {
         errorDetails.put("status", e.getStatus().value());
         
         return ResponseEntityBuilder.error(errorDetails, e.getStatus());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleAccessDeniedException(
+            AccessDeniedException e, HttpServletRequest request) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("message", "접근 권한이 없습니다.");
+        errorDetails.put("path", request.getRequestURI());
+        errorDetails.put("method", request.getMethod());
+        errorDetails.put("status", HttpStatus.FORBIDDEN.value());
+        
+        log.error("접근 권한 없음: {}", errorDetails);
+        return ResponseEntityBuilder.error(errorDetails, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -99,7 +113,7 @@ public class GlobalExceptionHandler {
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.BAD_REQUEST.value());
         errorDetails.put("parameter", e.getParameterName());
-        errorDetails.put("parameterType", e.getParameterType().toString());
+        errorDetails.put("parameterType", e.getParameterType());
         
         log.error("필수 파라미터 누락: {}", errorDetails);
         return ResponseEntityBuilder.error(errorDetails, HttpStatus.BAD_REQUEST);
