@@ -62,11 +62,6 @@ public class UserLoginLog {
     @Comment("로그인 시도 시간")
     private LocalDateTime loginAt;
 
-    @LastModifiedDate
-    @Column(nullable = false)
-    @Comment("기록 수정 시간")
-    private LocalDateTime updatedAt;
-
     @Builder
     public UserLoginLog(User user, String ipAddress, String userAgent, 
                        String deviceType, String browserInfo, String osInfo, 
@@ -80,7 +75,6 @@ public class UserLoginLog {
         this.successful = successful;
         this.failReason = failReason;
         this.loginAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
     public static UserLoginLog createLog(User user, String ipAddress, String userAgent, String deviceType, String browserInfo, String osInfo) {
@@ -93,7 +87,6 @@ public class UserLoginLog {
                 .osInfo(osInfo)
                 .successful(true)
                 .loginAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -108,7 +101,6 @@ public class UserLoginLog {
                 .successful(false)
                 .failReason(failReason)
                 .loginAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
     }
 } 

@@ -62,9 +62,9 @@ public class User extends AggregateRoot<Long> {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Comment("사용자 역할 (USER, ADMIN)")
+    @Comment("사용자 역할 (USER, ADMIN, ROLE_FREE, ROLE_STANDARD, ROLE_PRO)")
     @Builder.Default
-    private Role role = Role.USER;
+    private Role role = Role.USER_FREE;
 
     @Column(nullable = false)
     @Comment("계정 활성화 상태")
@@ -94,7 +94,7 @@ public class User extends AggregateRoot<Long> {
     }
 
     public enum Role {
-        USER, ADMIN
+        ADMIN, USER_FREE, USER_STANDARD, USER_PRO
     }
 
     // 생성 메서드
@@ -104,7 +104,7 @@ public class User extends AggregateRoot<Long> {
                 .password(password)
                 .displayName(name)
                 .plan(plan)
-                .role(Role.USER)
+                .role(Role.USER_FREE)
                 .active(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -134,7 +134,7 @@ public class User extends AggregateRoot<Long> {
                 .displayName(name)
                 .provider(provider)
                 .plan(plan)
-                .role(Role.USER)
+                .role(Role.USER_FREE)
                 .active(true)
                 .password("SOCIAL_USER_" + System.currentTimeMillis())
                 .createdAt(LocalDateTime.now())
