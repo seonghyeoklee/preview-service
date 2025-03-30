@@ -2,12 +2,14 @@ package com.evawova.preview.domain.user.entity;
 
 import com.evawova.preview.domain.common.model.AggregateRoot;
 import com.evawova.preview.domain.user.event.PlanCreatedEvent;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +17,8 @@ import java.time.LocalDateTime;
 @Table(name = "plans")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class Plan extends AggregateRoot<Long> {
 
     @Id
@@ -77,13 +80,16 @@ public class Plan extends AggregateRoot<Long> {
     ) {
         validatePlan(type, monthlyPrice, annualPrice, monthlyTokenLimit);
 
-        Plan plan = new Plan();
-        plan.name = name;
-        plan.type = type;
-        plan.monthlyPrice = monthlyPrice;
-        plan.annualPrice = annualPrice;
-        plan.monthlyTokenLimit = monthlyTokenLimit;
-        plan.active = active;
+        Plan plan = Plan.builder()
+                .name(name)
+                .type(type)
+                .monthlyPrice(monthlyPrice)
+                .annualPrice(annualPrice)
+                .monthlyTokenLimit(monthlyTokenLimit)
+                .active(active)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
         
         // 도메인 이벤트 등록
         plan.registerEvent(new PlanCreatedEvent(plan.id, plan.name, plan.type));

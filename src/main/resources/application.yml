@@ -1,6 +1,8 @@
 spring:
   application:
     name: preview-service
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
@@ -19,8 +21,49 @@ spring:
         default_batch_fetch_size: 100
     hibernate:
       ddl-auto: create
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+    com.evawova.preview.common.filter: debug
+  file:
+    name: logs/application.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+logging:
+  level:
+    com.evawova.preview: debug
+    com.evawova.preview.common.filter: debug
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    com.evawova.preview: debug
+    com.evawova.preview.common.filter: debug
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    com.evawova.preview.common.filter: warn
+    root: info

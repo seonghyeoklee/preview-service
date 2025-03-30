@@ -1,5 +1,7 @@
 package com.evawova.preview.domain.user.dto;
 
+import java.time.LocalDateTime;
+
 import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.PlanType;
 import lombok.Builder;
@@ -15,6 +17,8 @@ public class PlanDto {
     private Integer annualPrice;
     private Integer monthlyTokenLimit;
     private boolean active;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static PlanDto fromEntity(Plan plan) {
         return PlanDto.builder()

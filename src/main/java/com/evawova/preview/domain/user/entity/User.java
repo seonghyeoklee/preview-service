@@ -99,14 +99,16 @@ public class User extends AggregateRoot<Long> {
 
     // 생성 메서드
     public static User createUser(String email, String password, String name, Plan plan) {
-        User user = new User();
-        user.email = email;
-        user.password = password;
-        user.displayName = name;
-        user.plan = plan;
-        user.role = Role.USER;
-        user.createdAt = LocalDateTime.now();
-        user.updatedAt = LocalDateTime.now();
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .displayName(name)
+                .plan(plan)
+                .role(Role.USER)
+                .active(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
         
         // 도메인 이벤트 등록
         user.registerEvent(new UserCreatedEvent(user.id, user.email, user.displayName, plan.getType()));
@@ -126,18 +128,18 @@ public class User extends AggregateRoot<Long> {
 
     // 소셜 로그인용 생성자
     public static User createSocialUser(String uid, String email, String name, Provider provider, Plan plan) {
-        User user = new User();
-        user.uid = uid;
-        user.email = email;
-        user.displayName = name;
-        user.provider = provider;
-        user.plan = plan;
-        user.role = Role.USER;
-        user.createdAt = LocalDateTime.now();
-        user.updatedAt = LocalDateTime.now();
-        
-        // 소셜 로그인은 비밀번호가 없으므로 임시 비밀번호 설정
-        user.password = "SOCIAL_USER_" + System.currentTimeMillis();
+        User user = User.builder()
+                .uid(uid)
+                .email(email)
+                .displayName(name)
+                .provider(provider)
+                .plan(plan)
+                .role(Role.USER)
+                .active(true)
+                .password("SOCIAL_USER_" + System.currentTimeMillis())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
         
         user.registerEvent(new UserCreatedEvent(user.getId(), user.getEmail(), user.getDisplayName(), user.getPlan().getType()));
         return user;

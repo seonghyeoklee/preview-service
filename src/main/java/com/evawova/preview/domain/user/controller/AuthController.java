@@ -40,7 +40,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> socialLogin(
             @Valid @RequestBody SocialLoginRequest request,
             HttpServletRequest httpRequest) {
-        
+
         // 소셜 로그인 처리
         UserDto userDto = userService.socialLogin(request);
         
