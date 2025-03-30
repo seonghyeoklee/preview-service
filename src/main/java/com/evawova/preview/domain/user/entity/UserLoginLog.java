@@ -2,13 +2,13 @@ package com.evawova.preview.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @Table(name = "user_login_logs")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class UserLoginLog {
 
     @Id
@@ -83,31 +84,31 @@ public class UserLoginLog {
     }
 
     public static UserLoginLog createLog(User user, String ipAddress, String userAgent, String deviceType, String browserInfo, String osInfo) {
-        UserLoginLog log = new UserLoginLog();
-        log.user = user;
-        log.ipAddress = ipAddress;
-        log.userAgent = userAgent;
-        log.deviceType = deviceType;
-        log.browserInfo = browserInfo;
-        log.osInfo = osInfo;
-        log.successful = true;
-        log.loginAt = LocalDateTime.now();
-        log.updatedAt = LocalDateTime.now();
-        return log;
+        return UserLoginLog.builder()
+                .user(user)
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
+                .deviceType(deviceType)
+                .browserInfo(browserInfo)
+                .osInfo(osInfo)
+                .successful(true)
+                .loginAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     public static UserLoginLog createFailedLog(User user, String ipAddress, String userAgent, String deviceType, String browserInfo, String osInfo, String failReason) {
-        UserLoginLog log = new UserLoginLog();
-        log.user = user;
-        log.ipAddress = ipAddress;
-        log.userAgent = userAgent;
-        log.deviceType = deviceType;
-        log.browserInfo = browserInfo;
-        log.osInfo = osInfo;
-        log.successful = false;
-        log.failReason = failReason;
-        log.loginAt = LocalDateTime.now();
-        log.updatedAt = LocalDateTime.now();
-        return log;
+        return UserLoginLog.builder()
+                .user(user)
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
+                .deviceType(deviceType)
+                .browserInfo(browserInfo)
+                .osInfo(osInfo)
+                .successful(false)
+                .failReason(failReason)
+                .loginAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 } 
