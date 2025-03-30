@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/plans/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/v1/app/**").permitAll()
                 
                 // 관리자 전용 API
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
