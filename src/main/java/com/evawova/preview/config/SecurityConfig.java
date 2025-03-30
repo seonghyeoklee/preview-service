@@ -31,11 +31,24 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // 공개 API (인증 필요 없음)
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/plans/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                
+                // 관리자 전용 API
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                
+                // 도메인별 권한 설정
+                // 분석 관련 API - 기본 분석은 모든 사용자, 고급 분석은 STANDARD 이상, 프리미엄 분석은 PRO 이상
+                .requestMatchers("/api/v1/analysis/premium/**").hasAnyRole("USER_PRO", "ADMIN")
+                .requestMatchers("/api/v1/analysis/advanced/**").hasAnyRole("USER_STANDARD", "USER_PRO", "ADMIN")
+                
+                // 설정 관련 API - 고급 설정은 PRO 이상
+                .requestMatchers("/api/v1/config/advanced/**").hasAnyRole("USER_PRO", "ADMIN")
+                
+                // 그 외 모든 요청은 인증 필요
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptionHandling -> 

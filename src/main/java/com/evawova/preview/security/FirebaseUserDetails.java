@@ -24,7 +24,14 @@ public class FirebaseUserDetails implements UserDetails {
     public FirebaseUserDetails(User user) {
         this.uid = user.getUid();
         this.user = user;
-        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        
+        // 역할 이름이 이미 ROLE_ 접두사를 포함하고 있는지 확인
+        String roleName = user.getRole().name();
+        if(roleName.startsWith("ROLE_")) {
+            this.authorities = Collections.singletonList(new SimpleGrantedAuthority(roleName));
+        } else {
+            this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName));
+        }
     }
 
     @Override

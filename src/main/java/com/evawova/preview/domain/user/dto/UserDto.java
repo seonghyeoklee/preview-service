@@ -1,14 +1,17 @@
 package com.evawova.preview.domain.user.dto;
 
-import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.User;
-import lombok.Getter;
-import lombok.Setter;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserDto {
     private Long id;
     private String uid;
@@ -21,24 +24,20 @@ public class UserDto {
     private String photoUrl;
     private Boolean isEmailVerified;
     private LocalDateTime lastLoginAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public static UserDto fromEntity(User user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setUid(user.getUid());
-        dto.setEmail(user.getEmail());
-        dto.setDisplayName(user.getDisplayName());
-        dto.setPlan(PlanDto.fromEntity(user.getPlan()));
-        dto.setProvider(user.getProvider());
-        dto.setRole(user.getRole());
-        dto.setActive(user.isActive());
-        dto.setPhotoUrl(user.getPhotoUrl());
-        dto.setIsEmailVerified(user.isEmailVerified());
-        dto.setLastLoginAt(user.getLastLoginAt());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
-        return dto;
+        return UserDto.builder()
+            .id(user.getId())
+            .uid(user.getUid())
+            .email(user.getEmail())
+            .displayName(user.getDisplayName())
+            .plan(PlanDto.fromEntity(user.getPlan()))
+            .provider(user.getProvider())
+            .role(user.getRole())
+            .active(user.isActive())
+            .photoUrl(user.getPhotoUrl())
+            .isEmailVerified(user.isEmailVerified())
+            .lastLoginAt(user.getLastLoginAt())
+            .build();
     }
 } 

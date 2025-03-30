@@ -1,6 +1,9 @@
 package com.evawova.preview.domain.user.controller;
 
 import com.evawova.preview.domain.user.dto.UserDto;
+import com.evawova.preview.domain.user.dto.UserUpdateRequest;
+import com.evawova.preview.domain.user.entity.Plan;
+import com.evawova.preview.domain.user.entity.PlanType;
 import com.evawova.preview.domain.user.entity.User;
 import com.evawova.preview.domain.user.service.UserService;
 import com.evawova.preview.security.FirebaseTokenProvider;
@@ -15,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,14 +27,18 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
 @Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 class UserControllerTest {
 
     @Autowired
@@ -60,19 +68,31 @@ class UserControllerTest {
                 .alwaysDo(print())
                 .build();
 
+        // Plan 객체 생성
+        Plan freePlan = Plan.builder()
+                .id(1L)
+                .name("Free")
+                .type(PlanType.FREE)
+                .monthlyPrice(0)
+                .annualPrice(0)
+                .monthlyTokenLimit(10000)
+                .active(true)
+                .build();
+
         testUser = User.builder()
                 .id(1L)
                 .uid(TEST_UID)
                 .email("test@example.com")
                 .displayName("Test User")
                 .provider(User.Provider.GOOGLE)
-                .role(User.Role.USER)
+                .role(User.Role.USER_FREE)
                 .active(true)
                 .photoUrl("https://example.com/photo.jpg")
                 .isEmailVerified(true)
                 .lastLoginAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .plan(freePlan) // Plan 설정
                 .build();
 
         testUserDto = UserDto.fromEntity(testUser);
@@ -98,7 +118,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.role").value(testUser.getRole().name()))
                 .andExpect(jsonPath("$.data.active").value(testUser.isActive()))
                 .andExpect(jsonPath("$.data.photoUrl").value(testUser.getPhotoUrl()))
-                .andExpect(jsonPath("$.data.emailVerified").value(testUser.isEmailVerified()))
+                .andExpect(jsonPath("$.data.isEmailVerified").value(testUser.isEmailVerified()))
                 .andReturn();
 
         System.out.println("Response Body: " + result.getResponse().getContentAsString());
@@ -151,5 +171,78 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockFirebaseUser(uid = "test-uid", email = "test@example.com", displayName = "Test User", role = "USER_FREE")
+    @DisplayName("현재 사용자 정보를 조회할 수 있다")
+    void getCurrentUser() throws Exception {
+        // given
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .uid("test-uid")
+                .email("test@example.com")
+                .displayName("Test User")
+                .role(User.Role.USER_FREE)
+                .active(true)
+                .build();
+
+        given(userService.getUserByUid("test-uid")).willReturn(userDto);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.uid").value("test-uid"))
+                .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                .andExpect(jsonPath("$.data.displayName").value("Test User"))
+                .andExpect(jsonPath("$.data.role").value("USER_FREE"));
+    }
+
+    @Test
+    @WithMockFirebaseUser(uid = "test-uid", email = "test@example.com", displayName = "Test User", role = "USER_FREE")
+    @DisplayName("현재 사용자 정보를 업데이트할 수 있다")
+    void updateCurrentUser() throws Exception {
+        // given
+        UserUpdateRequest updateRequest = UserUpdateRequest.builder()
+                .displayName("Updated Name")
+                .build();
+
+        UserDto updatedUserDto = UserDto.builder()
+                .id(1L)
+                .uid("test-uid")
+                .email("test@example.com")
+                .displayName("Updated Name")
+                .role(User.Role.USER_FREE)
+                .active(true)
+                .build();
+
+        given(userService.updateUser(eq("test-uid"), any(UserUpdateRequest.class))).willReturn(updatedUserDto);
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.uid").value("test-uid"))
+                .andExpect(jsonPath("$.data.displayName").value("Updated Name"));
+    }
+
+    @Test
+    @WithMockFirebaseUser(uid = "test-uid", email = "test@example.com", displayName = "Test User", role = "USER_FREE")
+    @DisplayName("이름이 너무 짧으면 업데이트에 실패한다")
+    void updateCurrentUserWithInvalidName() throws Exception {
+        // given
+        UserUpdateRequest updateRequest = UserUpdateRequest.builder()
+                .displayName("A") // 2자 미만
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
     }
 } 
