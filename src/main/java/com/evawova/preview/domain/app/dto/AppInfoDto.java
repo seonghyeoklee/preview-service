@@ -47,6 +47,14 @@ public class AppInfoDto {
     private Set<String> supportedLanguages;
     private Map<String, String> termsOfServiceTranslations;
     
+    private String apiVersionInfo;
+    
+    // 배포 정보
+    private String deploymentInfo;
+    private String deploymentStatus;
+    private LocalDateTime lastDeploymentAt;
+    private String deploymentNotes;
+    
     public static AppInfoDto fromEntity(AppInfo appInfo) {
         return AppInfoDto.builder()
                 .id(appInfo.getId())
@@ -72,6 +80,10 @@ public class AppInfoDto {
                 .faqContent(appInfo.getFaqContent())
                 .supportedLanguages(appInfo.getSupportedLanguages())
                 .termsOfServiceTranslations(appInfo.getTermsOfServiceTranslations())
+                .deploymentInfo(appInfo.getDeploymentInfo())
+                .deploymentStatus(appInfo.getDeploymentStatus())
+                .lastDeploymentAt(appInfo.getLastDeploymentAt())
+                .deploymentNotes(appInfo.getDeploymentNotes())
                 .build();
     }
 } 

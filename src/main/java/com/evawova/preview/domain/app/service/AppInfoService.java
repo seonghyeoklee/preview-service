@@ -120,10 +120,29 @@ public class AppInfoService {
             "02-123-4567"
         );
         
+        // 배포 정보 업데이트
+        appInfo2.updateDeploymentInfo(
+            "자동 배포 시스템을 통한 배포",
+            "DEPLOYED",
+            "성능 개선 및 버그 수정"
+        );
+        
         // 다국어 약관 추가
         appInfo2.getTermsOfServiceTranslations().put("en", "Terms of Service in English");
         appInfo2.getTermsOfServiceTranslations().put("ja", "利用規約");
         
         return appInfoRepository.saveAll(List.of(appInfo1, appInfo2));
+    }
+    
+    /**
+     * 배포 정보 업데이트
+     */
+    public AppInfo updateDeploymentInfo(Long appInfoId, String deploymentInfo, 
+                                      String deploymentStatus, String deploymentNotes) {
+        AppInfo appInfo = appInfoRepository.findById(appInfoId)
+                .orElseThrow(() -> new IllegalArgumentException("앱 정보를 찾을 수 없습니다."));
+        
+        appInfo.updateDeploymentInfo(deploymentInfo, deploymentStatus, deploymentNotes);
+        return appInfoRepository.save(appInfo);
     }
 } 

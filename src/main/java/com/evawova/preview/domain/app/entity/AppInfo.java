@@ -108,6 +108,17 @@ public class AppInfo {
     
     private String apiVersionInfo;
     
+    // 배포 정보
+    @Column(columnDefinition = "TEXT")
+    private String deploymentInfo;
+    
+    private String deploymentStatus;
+    
+    private LocalDateTime lastDeploymentAt;
+    
+    @Column(columnDefinition = "TEXT")
+    private String deploymentNotes;
+    
     // 결제 및 환불 정보
     @Column(columnDefinition = "TEXT")
     private String paymentMethods;
@@ -142,6 +153,7 @@ public class AppInfo {
         this.privacyPolicy = privacyPolicy;
         this.companyName = companyName;
         this.contactEmail = contactEmail;
+        this.deploymentStatus = "PENDING"; // 초기 상태는 PENDING
     }
     
     // 정보 업데이트 메서드들
@@ -176,5 +188,14 @@ public class AppInfo {
 
     public void setFaqContent(Map<String, Object> faqContent) {
         this.faqContent = faqContent;
+    }
+
+    public void updateDeploymentInfo(String deploymentInfo, String deploymentStatus, 
+                                   String deploymentNotes) {
+        this.deploymentInfo = deploymentInfo;
+        this.deploymentStatus = deploymentStatus;
+        this.deploymentNotes = deploymentNotes;
+        this.lastDeploymentAt = LocalDateTime.now();
+        this.lastUpdatedAt = LocalDateTime.now();
     }
 }
