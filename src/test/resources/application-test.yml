@@ -19,8 +19,22 @@ spring:
         default_batch_fetch_size: 100
     hibernate:
       ddl-auto: create-drop
+  security:
+    basic:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:
     org.hibernate.SQL: debug
-    com.evawova.preview: debug 
+    com.evawova.preview: debug
+    org.springframework.security: debug
+
+# Firebase 설정 더미값 (테스트 환경에서만 사용)
+FIREBASE_PROJECT_ID: test-project-id
+FIREBASE_PRIVATE_KEY_ID: test-key-id
+FIREBASE_PRIVATE_KEY: test-private-key
+FIREBASE_CLIENT_EMAIL: test@example.com
+FIREBASE_CLIENT_ID: test-client-id
+FIREBASE_CLIENT_CERT_URL: https://test.example.com/cert 
