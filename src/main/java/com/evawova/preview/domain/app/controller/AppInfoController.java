@@ -99,4 +99,24 @@ public class AppInfoController {
         
         return ResponseEntityBuilder.success(appInfo.getFaqContent(), "FAQ 정보를 성공적으로 조회했습니다.");
     }
+    
+    /**
+     * 배포 정보 조회
+     */
+    @GetMapping("/deployment")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getDeploymentInfo() {
+        AppInfo appInfo = appInfoService.getLatestAppInfo();
+        if (appInfo == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Map<String, Object> deploymentInfo = Map.of(
+            "deploymentInfo", appInfo.getDeploymentInfo(),
+            "deploymentStatus", appInfo.getDeploymentStatus(),
+            "lastDeploymentAt", appInfo.getLastDeploymentAt(),
+            "deploymentNotes", appInfo.getDeploymentNotes()
+        );
+        
+        return ResponseEntityBuilder.success(deploymentInfo, "배포 정보를 성공적으로 조회했습니다.");
+    }
 } 
