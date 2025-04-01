@@ -32,10 +32,10 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // 공개 API (인증 필요 없음)
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/plans/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/v1/app/**").permitAll()
                 
                 // 관리자 전용 API
