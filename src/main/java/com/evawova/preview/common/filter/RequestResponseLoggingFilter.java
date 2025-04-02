@@ -9,7 +9,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -17,10 +16,8 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -34,14 +31,12 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             MediaType.APPLICATION_XML,
             MediaType.valueOf("application/*+json"),
             MediaType.valueOf("application/*+xml"),
-            MediaType.MULTIPART_FORM_DATA
-    );
+            MediaType.MULTIPART_FORM_DATA);
 
     private static final List<String> EXCLUDE_URI_PATTERNS = Arrays.asList(
             "/h2-console",
             "/actuator",
-            "/favicon.ico"
-    );
+            "/favicon.ico");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -54,7 +49,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         // 요청 ID 생성 (추적용)
         String requestId = UUID.randomUUID().toString().substring(0, 8);
-        
+
         // 요청과 응답을 캐싱하기 위한 래퍼
         ContentCachingRequestWrapper requestWrapper;
         if (request instanceof ContentCachingRequestWrapper) {
@@ -62,7 +57,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         } else {
             requestWrapper = new ContentCachingRequestWrapper(request);
         }
-        
+
         ContentCachingResponseWrapper responseWrapper;
         if (response instanceof ContentCachingResponseWrapper) {
             responseWrapper = (ContentCachingResponseWrapper) response;
@@ -98,21 +93,22 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
     private void logRequest(ContentCachingRequestWrapper request, String requestId) throws IOException {
         String queryString = request.getQueryString();
         String url = queryString == null ? request.getRequestURI() : request.getRequestURI() + "?" + queryString;
-        
+
         log.info("[{}] 요청: {} {} ({})", requestId, request.getMethod(), url, request.getRemoteAddr());
-        
+
         // 헤더 로깅
         // Collections.list(request.getHeaderNames())
-        //         .forEach(headerName -> {
-        //             Collections.list(request.getHeaders(headerName))
-        //                     .forEach(headerValue -> {
-        //                         // 민감한 정보(Authorization 등)는 일부만 로깅
-        //                         if (headerName.equalsIgnoreCase("Authorization")) {
-        //                             headerValue = headerValue.substring(0, Math.min(headerValue.length(), 10)) + "...";
-        //                         }
-        //                         log.debug("[{}] 요청 헤더: {}: {}", requestId, headerName, headerValue);
-        //                     });
-        //         });
+        // .forEach(headerName -> {
+        // Collections.list(request.getHeaders(headerName))
+        // .forEach(headerValue -> {
+        // // 민감한 정보(Authorization 등)는 일부만 로깅
+        // if (headerName.equalsIgnoreCase("Authorization")) {
+        // headerValue = headerValue.substring(0, Math.min(headerValue.length(), 10)) +
+        // "...";
+        // }
+        // log.debug("[{}] 요청 헤더: {}: {}", requestId, headerName, headerValue);
+        // });
+        // });
 
         // 파라미터 로깅
         request.getParameterMap().forEach((key, values) -> {
@@ -140,16 +136,17 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 
     private void logResponse(ContentCachingResponseWrapper response, String requestId, long duration) {
         int status = response.getStatus();
+
         log.info("[{}] 응답: {} ({}ms)", requestId, status, duration);
-        
+
         // 헤더 로깅
         // response.getHeaderNames()
-        //         .forEach(headerName -> {
-        //             response.getHeaders(headerName)
-        //                     .forEach(headerValue -> {
-        //                         log.debug("[{}] 응답 헤더: {}: {}", requestId, headerName, headerValue);
-        //                     });
-        //         });
+        // .forEach(headerName -> {
+        // response.getHeaders(headerName)
+        // .forEach(headerValue -> {
+        // log.debug("[{}] 응답 헤더: {}: {}", requestId, headerName, headerValue);
+        // });
+        // });
 
         // 응답 본문 로깅
         byte[] content = response.getContentAsByteArray();
@@ -179,4 +176,4 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             return false;
         }
     }
-} 
+}

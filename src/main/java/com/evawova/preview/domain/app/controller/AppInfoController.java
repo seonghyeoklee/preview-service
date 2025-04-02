@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.evawova.preview.common.response.ApiResponse;
-import com.evawova.preview.common.response.ResponseEntityBuilder;
 import com.evawova.preview.domain.app.dto.AppInfoDto;
 import com.evawova.preview.domain.app.dto.CompanyInfoDto;
 import com.evawova.preview.domain.app.dto.ServiceStatusInfoDto;
@@ -42,7 +41,7 @@ public class AppInfoController {
         if (appInfo == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntityBuilder.success(AppInfoDto.fromEntity(appInfo), "앱 정보를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(AppInfoDto.fromEntity(appInfo), "앱 정보를 성공적으로 조회했습니다."));
     }
     
     /**
@@ -69,7 +68,7 @@ public class AppInfoController {
             return ResponseEntity.notFound().build();
         }
         
-        return ResponseEntityBuilder.success(content, "법적 정보를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(content, "법적 정보를 성공적으로 조회했습니다."));
     }
     
     /**
@@ -82,8 +81,8 @@ public class AppInfoController {
             return ResponseEntity.notFound().build();
         }
         
-        return ResponseEntityBuilder.success(CompanyInfoDto.fromEntity(appInfo.getCompanyInfo()), 
-            "회사 정보를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(CompanyInfoDto.fromEntity(appInfo.getCompanyInfo()), 
+            "회사 정보를 성공적으로 조회했습니다."));
     }
     
     /**
@@ -97,8 +96,8 @@ public class AppInfoController {
             return ResponseEntity.notFound().build();
         }
         
-        return ResponseEntityBuilder.success(appInfo.getServiceStatusInfo().getFaqContent(), 
-            "FAQ 정보를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(appInfo.getServiceStatusInfo().getFaqContent(), 
+            "FAQ 정보를 성공적으로 조회했습니다."));
     }
     
     /**
@@ -111,8 +110,8 @@ public class AppInfoController {
             return ResponseEntity.notFound().build();
         }
         
-        return ResponseEntityBuilder.success(DeploymentInfoDto.fromEntity(appInfo.getDeploymentInfo()), 
-            "배포 정보를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(DeploymentInfoDto.fromEntity(appInfo.getDeploymentInfo()), 
+                "배포 정보를 성공적으로 조회했습니다."));
     }
     
     /**
@@ -128,8 +127,8 @@ public class AppInfoController {
         }
         
         var updatedStatusInfo = appInfoService.updateServiceStatus(appInfo.getId(), status, message);
-        return ResponseEntityBuilder.success(ServiceStatusInfoDto.fromEntity(updatedStatusInfo), 
-            "서비스 상태가 성공적으로 업데이트되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(ServiceStatusInfoDto.fromEntity(updatedStatusInfo), 
+            "서비스 상태가 성공적으로 업데이트되었습니다."));
     }
     
     /**
@@ -146,8 +145,8 @@ public class AppInfoController {
         }
         
         var updatedStatusInfo = appInfoService.setEmergencyNotice(appInfo.getId(), notice, startAt, endAt);
-        return ResponseEntityBuilder.success(ServiceStatusInfoDto.fromEntity(updatedStatusInfo), 
-            "긴급 공지가 성공적으로 설정되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(ServiceStatusInfoDto.fromEntity(updatedStatusInfo), 
+            "긴급 공지가 성공적으로 설정되었습니다."));
     }
     
     /**
@@ -161,7 +160,7 @@ public class AppInfoController {
         }
         
         var updatedStatusInfo = appInfoService.clearEmergencyNotice(appInfo.getId());
-        return ResponseEntityBuilder.success(ServiceStatusInfoDto.fromEntity(updatedStatusInfo), 
-            "긴급 공지가 성공적으로 해제되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(ServiceStatusInfoDto.fromEntity(updatedStatusInfo), 
+            "긴급 공지가 성공적으로 해제되었습니다."));
     }
 } 

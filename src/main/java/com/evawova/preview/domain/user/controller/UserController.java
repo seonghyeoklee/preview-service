@@ -2,7 +2,6 @@ package com.evawova.preview.domain.user.controller;
 
 import com.evawova.preview.common.exception.ApiException;
 import com.evawova.preview.common.response.ApiResponse;
-import com.evawova.preview.common.response.ResponseEntityBuilder;
 import com.evawova.preview.domain.user.dto.UserDto;
 import com.evawova.preview.domain.user.dto.ChangePlanRequest;
 import com.evawova.preview.domain.user.dto.UserUpdateRequest;
@@ -31,7 +30,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
         List<UserDto> users = userService.getAllUsers();
-        return ResponseEntityBuilder.success(users, "사용자 목록을 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(users, "사용자 목록을 성공적으로 조회했습니다."));
     }
 
     @GetMapping("/{id}")
@@ -39,7 +38,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable Long id, @AuthenticationPrincipal FirebaseUserDetails principal) {
         try {
             UserDto user = userService.getUserById(id);
-            return ResponseEntityBuilder.success(user, "사용자 정보를 성공적으로 조회했습니다.");
+            return ResponseEntity.ok(ApiResponse.success(user, "사용자 정보를 성공적으로 조회했습니다."));
         } catch (IllegalArgumentException e) {
             throw new ApiException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다: " + id);
         }
@@ -48,7 +47,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(@AuthenticationPrincipal FirebaseUserDetails principal) {
         UserDto userDto = userService.getUserByUid(principal.getUid());
-        return ResponseEntityBuilder.success(userDto, "내 정보를 성공적으로 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(userDto, "내 정보를 성공적으로 조회했습니다."));
     }
 
     @PutMapping("/me")
@@ -57,7 +56,7 @@ public class UserController {
             @Valid @RequestBody UserUpdateRequest updateRequest) {
         
         UserDto updatedUser = userService.updateUser(principal.getUid(), updateRequest);
-        return ResponseEntityBuilder.success(updatedUser, "내 정보가 성공적으로 변경되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(updatedUser, "내 정보가 성공적으로 변경되었습니다."));
     }
 
     @PutMapping("/me/plan")
@@ -67,7 +66,7 @@ public class UserController {
         try {
             PlanType planType = PlanType.valueOf(request.getPlanType().toUpperCase());
             UserDto user = userService.changeUserPlanByUid(principal.getUid(), planType);
-            return ResponseEntityBuilder.success(user, "내 플랜이 성공적으로 변경되었습니다.");
+            return ResponseEntity.ok(ApiResponse.success(user, "내 플랜이 성공적으로 변경되었습니다."));
         } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("찾을 수 없습니다")) {
                 throw new ApiException(HttpStatus.NOT_FOUND, e.getMessage());

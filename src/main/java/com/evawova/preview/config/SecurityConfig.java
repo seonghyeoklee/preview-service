@@ -27,39 +27,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // 공개 API (인증 필요 없음)
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/plans/**").permitAll()
-                .requestMatchers("/api/v1/app/**").permitAll()
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/api-docs/**").permitAll()
-                .requestMatchers("/v3/api-docs/**").permitAll()
-                // 관리자 전용 API
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/interview/**").hasAnyRole("USER_FREE", "USER_STANDARD", "USER_PRO", "ADMIN")
 
-                // 도메인별 권한 설정
-                // 분석 관련 API - 기본 분석은 모든 사용자, 고급 분석은 STANDARD 이상, 프리미엄 분석은 PRO 이상
-                .requestMatchers("/api/v1/analysis/premium/**").hasAnyRole("USER_PRO", "ADMIN")
-                .requestMatchers("/api/v1/analysis/advanced/**").hasAnyRole("USER_STANDARD", "USER_PRO", "ADMIN")
-                
-                // 설정 관련 API - 고급 설정은 PRO 이상
-                .requestMatchers("/api/v1/config/advanced/**").hasAnyRole("USER_PRO", "ADMIN")
-                
-                // 그 외 모든 요청은 인증 필요
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(exceptionHandling -> 
-                exceptionHandling.accessDeniedHandler(accessDeniedHandler())
-            )
-            .headers(headers -> headers.frameOptions().disable())
-            .addFilterBefore(firebaseAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // 공개 API (인증 필요 없음)
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/plans/**").permitAll()
+                        .requestMatchers("/api/v1/app/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        // 관리자 전용 API
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/interview/**")
+                        .hasAnyRole("USER_FREE", "USER_STANDARD", "USER_PRO", "ADMIN")
+
+                        // 도메인별 권한 설정
+                        // 분석 관련 API - 기본 분석은 모든 사용자, 고급 분석은 STANDARD 이상, 프리미엄 분석은 PRO 이상
+                        .requestMatchers("/api/v1/analysis/premium/**").hasAnyRole("USER_PRO", "ADMIN")
+                        .requestMatchers("/api/v1/analysis/advanced/**")
+                        .hasAnyRole("USER_STANDARD", "USER_PRO", "ADMIN")
+
+                        // 설정 관련 API - 고급 설정은 PRO 이상
+                        .requestMatchers("/api/v1/config/advanced/**").hasAnyRole("USER_PRO", "ADMIN")
+
+                        // 그 외 모든 요청은 인증 필요
+                        .anyRequest().authenticated())
+                .exceptionHandling(exceptionHandling -> exceptionHandling.accessDeniedHandler(accessDeniedHandler()))
+                .headers(headers -> headers.frameOptions().disable())
+                .addFilterBefore(firebaseAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -78,4 +78,4 @@ public class SecurityConfig {
     public FirebaseAuthenticationFilter firebaseAuthenticationFilter() {
         return new FirebaseAuthenticationFilter(firebaseTokenProvider);
     }
-} 
+}
