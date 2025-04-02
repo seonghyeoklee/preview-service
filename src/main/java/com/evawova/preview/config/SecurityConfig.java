@@ -37,10 +37,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/plans/**").permitAll()
                 .requestMatchers("/api/v1/app/**").permitAll()
-                
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
                 // 관리자 전용 API
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                
+                .requestMatchers("/api/v1/interview/**").hasAnyRole("USER_FREE", "USER_STANDARD", "USER_PRO", "ADMIN")
+
                 // 도메인별 권한 설정
                 // 분석 관련 API - 기본 분석은 모든 사용자, 고급 분석은 STANDARD 이상, 프리미엄 분석은 PRO 이상
                 .requestMatchers("/api/v1/analysis/premium/**").hasAnyRole("USER_PRO", "ADMIN")

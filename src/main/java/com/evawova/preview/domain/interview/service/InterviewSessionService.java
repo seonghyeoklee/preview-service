@@ -2,7 +2,7 @@ package com.evawova.preview.domain.interview.service;
 
 import com.evawova.preview.domain.interview.dto.InterviewSessionDto;
 import com.evawova.preview.domain.interview.dto.InterviewSettings;
-import com.evawova.preview.domain.interview.model.InterviewSession;
+import com.evawova.preview.domain.interview.entity.InterviewSession;
 import com.evawova.preview.domain.interview.repository.InterviewSessionRepository;
 import com.evawova.preview.domain.user.entity.User;
 import com.evawova.preview.domain.user.repository.UserRepository;

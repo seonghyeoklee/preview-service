@@ -1,5 +1,6 @@
 package com.evawova.preview.domain.interview.dto;
 
+import com.evawova.preview.domain.interview.entity.InterviewSession;
 import com.evawova.preview.domain.interview.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
