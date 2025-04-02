@@ -1,7 +1,6 @@
 package com.evawova.preview.domain.admin.controller;
 
 import com.evawova.preview.common.response.ApiResponse;
-import com.evawova.preview.common.response.ResponseEntityBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +35,7 @@ public class AdminController {
         systemStats.put("averageResponseTime", 120);
         systemStats.put("errorRate", 0.02);
         
-        return ResponseEntityBuilder.success(systemStats, "시스템 통계 정보 조회 성공");
+        return ResponseEntity.ok(ApiResponse.success(systemStats, "시스템 통계 정보 조회 성공"));
     }
     
     /**
@@ -45,7 +44,7 @@ public class AdminController {
     @PostMapping("/system/restart")
     public ResponseEntity<ApiResponse<String>> restartService() {
         // 서비스 재시작 기능 (예시)
-        return ResponseEntityBuilder.success("서비스가 성공적으로 재시작되었습니다.", "서비스 재시작 성공");
+        return ResponseEntity.ok(ApiResponse.success("서비스가 성공적으로 재시작되었습니다.", "서비스 재시작 성공"));
     }
     
     /**
@@ -61,7 +60,7 @@ public class AdminController {
             "사용자 D가 계정 삭제 (1시간 전)"
         );
         
-        return ResponseEntityBuilder.success(activities, "사용자 활동 로그 조회 성공");
+        return ResponseEntity.ok(ApiResponse.success(activities, "사용자 활동 로그 조회 성공"));
     }
     
     /**
@@ -80,6 +79,6 @@ public class AdminController {
             "burstCapacity", 120
         ));
         
-        return ResponseEntityBuilder.success(config, "시스템 설정 조회 성공");
+        return ResponseEntity.ok(ApiResponse.success(config, "시스템 설정 조회 성공"));
     }
 } 

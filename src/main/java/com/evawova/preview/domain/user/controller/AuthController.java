@@ -2,7 +2,6 @@ package com.evawova.preview.domain.user.controller;
 
 import com.evawova.preview.common.exception.ApiException;
 import com.evawova.preview.common.response.ApiResponse;
-import com.evawova.preview.common.response.ResponseEntityBuilder;
 import com.evawova.preview.domain.user.dto.SocialLoginRequest;
 import com.evawova.preview.domain.user.dto.UserDto;
 import com.evawova.preview.domain.user.dto.UserLoginLogDto;
@@ -60,13 +59,13 @@ public class AuthController {
             "osInfo", loginLog.getOsInfo()
         ));
         
-        return ResponseEntityBuilder.success(response, "소셜 로그인이 완료되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(response, "소셜 로그인이 완료되었습니다."));
     }
 
     @DeleteMapping("/withdraw/{userId}")
     public ResponseEntity<ApiResponse<Void>> withdrawUser(@PathVariable Long userId) {
         userService.withdrawUser(userId);
-        return ResponseEntityBuilder.success(null, "회원 탈퇴가 완료되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(null, "회원 탈퇴가 완료되었습니다."));
     }
 
     @GetMapping("/login-history/{userId}")
@@ -100,6 +99,6 @@ public class AuthController {
                     .collect(Collectors.toList());
         }
         
-        return ResponseEntityBuilder.success(loginHistory, "로그인 내역을 조회했습니다.");
+        return ResponseEntity.ok(ApiResponse.success(loginHistory, "로그인 내역을 조회했습니다."));
     }
 } 

@@ -1,7 +1,8 @@
 package com.evawova.preview.common.exception;
 
 import com.evawova.preview.common.response.ApiResponse;
-import com.evawova.preview.common.response.ResponseEntityBuilder;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,16 +25,17 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ApiResponse<Map<String, Object>>> handleApiException(ApiException e, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleApiException(ApiException e,
+            HttpServletRequest request) {
         log.error("API 예외 발생: {}", e.getMessage());
-        
+
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", e.getMessage());
         errorDetails.put("path", request.getRequestURI());
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", e.getStatus().value());
-        
-        return ResponseEntityBuilder.error(errorDetails, e.getStatus());
+
+        return ResponseEntity.status(e.getStatus()).body(ApiResponse.error(errorDetails, e.getStatus()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -44,9 +46,9 @@ public class GlobalExceptionHandler {
         errorDetails.put("path", request.getRequestURI());
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.FORBIDDEN.value());
-        
+
         log.error("접근 권한 없음: {}", errorDetails);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(errorDetails, HttpStatus.FORBIDDEN));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -57,15 +59,15 @@ public class GlobalExceptionHandler {
         errorDetails.put("path", request.getRequestURI());
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.BAD_REQUEST.value());
-        
+
         Map<String, String> validationErrors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(error -> 
-            validationErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        e.getBindingResult().getFieldErrors()
+                .forEach(error -> validationErrors.put(error.getField(), error.getDefaultMessage()));
         errorDetails.put("validationErrors", validationErrors);
-        
+
         log.error("유효성 검증 실패: {}", validationErrors);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(errorDetails, HttpStatus.BAD_REQUEST));
     }
 
     @ExceptionHandler(BindException.class)
@@ -76,20 +78,21 @@ public class GlobalExceptionHandler {
         errorDetails.put("path", request.getRequestURI());
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.BAD_REQUEST.value());
-        
+
         Map<String, String> bindingErrors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(error -> 
-            bindingErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        e.getBindingResult().getFieldErrors()
+                .forEach(error -> bindingErrors.put(error.getField(), error.getDefaultMessage()));
         errorDetails.put("bindingErrors", bindingErrors);
-        
+
         log.error("바인딩 실패: {}", bindingErrors);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(errorDetails, HttpStatus.BAD_REQUEST));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", String.format("'%s'의 값 '%s'가 '%s' 타입으로 변환될 수 없습니다.",
                 e.getName(), e.getValue(), e.getRequiredType().getSimpleName()));
@@ -99,14 +102,16 @@ public class GlobalExceptionHandler {
         errorDetails.put("parameter", e.getName());
         errorDetails.put("value", e.getValue());
         errorDetails.put("requiredType", e.getRequiredType().getSimpleName());
-        
+
         log.error("인자 타입 불일치: {}", errorDetails);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(errorDetails, HttpStatus.BAD_REQUEST));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException e, HttpServletRequest request) {
+
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", String.format("필수 파라미터 '%s'가 누락되었습니다.", e.getParameterName()));
         errorDetails.put("path", request.getRequestURI());
@@ -114,9 +119,10 @@ public class GlobalExceptionHandler {
         errorDetails.put("status", HttpStatus.BAD_REQUEST.value());
         errorDetails.put("parameter", e.getParameterName());
         errorDetails.put("parameterType", e.getParameterType());
-        
+
         log.error("필수 파라미터 누락: {}", errorDetails);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(errorDetails, HttpStatus.BAD_REQUEST));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -128,9 +134,10 @@ public class GlobalExceptionHandler {
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.METHOD_NOT_ALLOWED.value());
         errorDetails.put("supportedMethods", e.getSupportedHttpMethods());
-        
+
         log.error("지원하지 않는 HTTP 메서드: {}", errorDetails);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.METHOD_NOT_ALLOWED);
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.error(errorDetails, HttpStatus.METHOD_NOT_ALLOWED));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -139,17 +146,32 @@ public class GlobalExceptionHandler {
         // favicon.ico 요청에 대한 404는 무시
         if (request.getRequestURI().equals("/favicon.ico")) {
             Map<String, Object> emptyDetails = new HashMap<>();
-            return ResponseEntityBuilder.error(emptyDetails, HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(emptyDetails, HttpStatus.NOT_FOUND));
         }
-        
+
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", String.format("요청한 리소스를 찾을 수 없습니다: %s", request.getRequestURI()));
         errorDetails.put("path", request.getRequestURI());
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-        
+
         log.error("리소스를 찾을 수 없음: {}", errorDetails);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(errorDetails, HttpStatus.NOT_FOUND));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleEntityNotFoundException(
+            EntityNotFoundException e, HttpServletRequest request) {
+
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("message", e.getMessage());
+        errorDetails.put("path", request.getRequestURI());
+        errorDetails.put("method", request.getMethod());
+        errorDetails.put("status", HttpStatus.NOT_FOUND.value());
+
+        log.error("엔티티를 찾을 수 없음: {}", errorDetails);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(errorDetails, HttpStatus.NOT_FOUND));
     }
 
     @ExceptionHandler(Exception.class)
@@ -160,8 +182,9 @@ public class GlobalExceptionHandler {
         errorDetails.put("path", request.getRequestURI());
         errorDetails.put("method", request.getMethod());
         errorDetails.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        
+
         log.error("예상치 못한 예외 발생", e);
-        return ResponseEntityBuilder.error(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR));
     }
-} 
+}
