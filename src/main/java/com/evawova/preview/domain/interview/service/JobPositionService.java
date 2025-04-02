@@ -1,6 +1,8 @@
 package com.evawova.preview.domain.interview.service;
 
 import com.evawova.preview.domain.interview.dto.JobPositionDto;
+import com.evawova.preview.domain.interview.entity.JobPosition;
+import com.evawova.preview.domain.interview.model.InterviewType;
 import com.evawova.preview.domain.interview.repository.JobPositionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,17 +13,29 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class JobPositionService {
 
     private final JobPositionRepository jobPositionRepository;
 
+    @Transactional(readOnly = true)
     public List<JobPositionDto> getAllPositions() {
         // Use the custom query to fetch skills eagerly
         return jobPositionRepository.findAllWithSkills().stream()
-                .map(JobPositionDto::from)
+                .map(JobPositionDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    // TODO: Add methods for creating, updating, deleting positions if needed.
+    @Transactional(readOnly = true)
+    public List<JobPositionDto> getPositionsByCategory(Long categoryId) {
+        return jobPositionRepository.findAllByCategoryIdWithSkills(categoryId).stream()
+                .map(JobPositionDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<JobPositionDto> getPositionsByCategoryType(InterviewType categoryType) {
+        return jobPositionRepository.findAllByCategoryTypeWithSkills(categoryType).stream()
+                .map(JobPositionDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 }
