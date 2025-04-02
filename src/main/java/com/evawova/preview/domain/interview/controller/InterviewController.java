@@ -6,11 +6,13 @@ import com.evawova.preview.domain.interview.model.*;
 import com.evawova.preview.domain.interview.service.InterviewPromptService;
 import com.evawova.preview.domain.interview.service.InterviewSessionService;
 import com.evawova.preview.security.FirebaseUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,7 @@ import java.util.Map;
 /**
  * 면접 관련 API를 제공하는 컨트롤러
  */
+@Tag(name = "Interview", description = "면접 관련 API")
 @RestController
 @RequestMapping("/api/v1/interview")
 @RequiredArgsConstructor
@@ -30,12 +33,9 @@ public class InterviewController {
 
     /**
      * 면접 프롬프트 생성 API
-     * 
-     * @param settings 면접 설정 정보
-     * @return 생성된 프롬프트
      */
+    @Operation(summary = "면접 프롬프트 생성", description = "설정에 따라 AI 면접 프롬프트를 생성합니다.")
     @PostMapping("/prompt")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, String>> generatePrompt(@RequestBody InterviewSettings settings) {
         String prompt = interviewPromptService.generateInterviewPrompt(settings);
         return ResponseEntity.ok(Map.of("prompt", prompt));
@@ -43,10 +43,8 @@ public class InterviewController {
     
     /**
      * 면접 설정을 위한 메타데이터 제공 API
-     * (Enum 값들을 클라이언트에게 제공)
-     * 
-     * @return 메타데이터
      */
+    @Operation(summary = "메타데이터 조회", description = "면접 설정에 필요한 Enum 값들을 조회합니다.")
     @GetMapping("/metadata")
     public ResponseEntity<Map<String, Object>> getMetadata() {
         return ResponseEntity.ok(Map.of(
@@ -62,38 +60,10 @@ public class InterviewController {
     }
     
     /**
-     * 레거시 호환을 위한 면접 프롬프트 생성 API
-     */
-    @PostMapping("/legacy-prompt")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Map<String, String>> generateLegacyPrompt(
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String position,
-            @RequestParam(required = false) String interviewStyle,
-            @RequestParam(required = false) String difficulty,
-            @RequestParam(required = false) String duration,
-            @RequestParam(required = false) String interviewMode,
-            @RequestParam(required = false) String experienceLevel,
-            @RequestParam(required = false) List<String> technicalSkills,
-            @RequestParam(required = false, defaultValue = "ko") String language) {
-        
-        InterviewSettings settings = InterviewSettings.fromLegacy(
-                type, position, interviewStyle, difficulty, duration, 
-                interviewMode, experienceLevel, technicalSkills, language);
-        
-        String prompt = interviewPromptService.generateInterviewPrompt(settings);
-        return ResponseEntity.ok(Map.of("prompt", prompt));
-    }
-    
-    /**
      * 인터뷰 세션 시작 API
-     * 
-     * @param firebaseUser 현재 로그인한 Firebase 사용자
-     * @param settings 인터뷰 설정
-     * @return 생성된 인터뷰 세션 정보
      */
+    @Operation(summary = "인터뷰 세션 시작", description = "새로운 인터뷰 세션을 시작합니다.")
     @PostMapping("/sessions/start")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<InterviewSessionDto> startInterviewSession(
             @AuthenticationPrincipal FirebaseUserDetails firebaseUser,
             @RequestBody InterviewSettings settings) {
@@ -106,14 +76,12 @@ public class InterviewController {
     
     /**
      * 인터뷰 세션 종료 API
-     * 
-     * @param sessionId 세션 ID
-     * @return 업데이트된 인터뷰 세션 정보
      */
+    @Operation(summary = "인터뷰 세션 종료", description = "진행 중인 인터뷰 세션을 종료합니다.")
     @PostMapping("/sessions/{sessionId}/end")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<InterviewSessionDto> endInterviewSession(
-            @PathVariable String sessionId) {
+            @AuthenticationPrincipal FirebaseUserDetails firebaseUser,
+            @Parameter(description = "세션 ID") @PathVariable String sessionId) {
         
         InterviewSessionDto sessionDto = interviewSessionService.endInterviewSession(sessionId);
         return ResponseEntity.ok(sessionDto);
@@ -121,14 +89,12 @@ public class InterviewController {
     
     /**
      * 인터뷰 세션 상세 조회 API
-     * 
-     * @param sessionId 세션 ID
-     * @return 인터뷰 세션 정보
      */
+    @Operation(summary = "인터뷰 세션 조회", description = "특정 인터뷰 세션의 상세 정보를 조회합니다.")
     @GetMapping("/sessions/{sessionId}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<InterviewSessionDto> getInterviewSession(
-            @PathVariable String sessionId) {
+            @AuthenticationPrincipal FirebaseUserDetails firebaseUser,
+            @Parameter(description = "세션 ID") @PathVariable String sessionId) {
         
         InterviewSessionDto sessionDto = interviewSessionService.getInterviewSession(sessionId);
         return ResponseEntity.ok(sessionDto);
@@ -136,13 +102,9 @@ public class InterviewController {
     
     /**
      * 사용자의 인터뷰 세션 목록 조회 API (페이징)
-     * 
-     * @param firebaseUser 현재 로그인한 Firebase 사용자
-     * @param pageable 페이징 정보
-     * @return 인터뷰 세션 목록
      */
+    @Operation(summary = "인터뷰 세션 목록 조회", description = "사용자의 모든 인터뷰 세션 목록을 페이징하여 조회합니다.")
     @GetMapping("/sessions")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<InterviewSessionDto>> getUserInterviewSessions(
             @AuthenticationPrincipal FirebaseUserDetails firebaseUser,
             Pageable pageable) {
@@ -155,12 +117,9 @@ public class InterviewController {
     
     /**
      * 사용자의 최근 인터뷰 세션 조회 API
-     * 
-     * @param firebaseUser 현재 로그인한 Firebase 사용자
-     * @return 최근 인터뷰 세션 정보
      */
+    @Operation(summary = "최근 인터뷰 세션 조회", description = "사용자의 가장 최근 인터뷰 세션을 조회합니다.")
     @GetMapping("/sessions/latest")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<InterviewSessionDto> getLatestInterviewSession(
             @AuthenticationPrincipal FirebaseUserDetails firebaseUser) {
         
@@ -172,12 +131,9 @@ public class InterviewController {
     
     /**
      * 사용자의 미완료 인터뷰 세션 목록 조회 API
-     * 
-     * @param firebaseUser 현재 로그인한 Firebase 사용자
-     * @return 미완료 인터뷰 세션 목록
      */
+    @Operation(summary = "미완료 인터뷰 세션 조회", description = "사용자의 종료되지 않은 인터뷰 세션 목록을 조회합니다.")
     @GetMapping("/sessions/incomplete")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<InterviewSessionDto>> getIncompleteInterviewSessions(
             @AuthenticationPrincipal FirebaseUserDetails firebaseUser) {
         

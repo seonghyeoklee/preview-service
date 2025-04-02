@@ -102,17 +102,17 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         log.info("[{}] 요청: {} {} ({})", requestId, request.getMethod(), url, request.getRemoteAddr());
         
         // 헤더 로깅
-        Collections.list(request.getHeaderNames())
-                .forEach(headerName -> {
-                    Collections.list(request.getHeaders(headerName))
-                            .forEach(headerValue -> {
-                                // 민감한 정보(Authorization 등)는 일부만 로깅
-                                if (headerName.equalsIgnoreCase("Authorization")) {
-                                    headerValue = headerValue.substring(0, Math.min(headerValue.length(), 10)) + "...";
-                                }
-                                log.debug("[{}] 요청 헤더: {}: {}", requestId, headerName, headerValue);
-                            });
-                });
+        // Collections.list(request.getHeaderNames())
+        //         .forEach(headerName -> {
+        //             Collections.list(request.getHeaders(headerName))
+        //                     .forEach(headerValue -> {
+        //                         // 민감한 정보(Authorization 등)는 일부만 로깅
+        //                         if (headerName.equalsIgnoreCase("Authorization")) {
+        //                             headerValue = headerValue.substring(0, Math.min(headerValue.length(), 10)) + "...";
+        //                         }
+        //                         log.debug("[{}] 요청 헤더: {}: {}", requestId, headerName, headerValue);
+        //                     });
+        //         });
 
         // 파라미터 로깅
         request.getParameterMap().forEach((key, values) -> {
@@ -143,13 +143,13 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         log.info("[{}] 응답: {} ({}ms)", requestId, status, duration);
         
         // 헤더 로깅
-        response.getHeaderNames()
-                .forEach(headerName -> {
-                    response.getHeaders(headerName)
-                            .forEach(headerValue -> {
-                                log.debug("[{}] 응답 헤더: {}: {}", requestId, headerName, headerValue);
-                            });
-                });
+        // response.getHeaderNames()
+        //         .forEach(headerName -> {
+        //             response.getHeaders(headerName)
+        //                     .forEach(headerValue -> {
+        //                         log.debug("[{}] 응답 헤더: {}: {}", requestId, headerName, headerValue);
+        //                     });
+        //         });
 
         // 응답 본문 로깅
         byte[] content = response.getContentAsByteArray();

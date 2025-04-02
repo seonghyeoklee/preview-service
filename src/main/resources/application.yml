@@ -51,6 +51,7 @@ logging:
   level:
     com.evawova.preview: debug
     com.evawova.preview.common.filter: debug
+    com.google.firebase: debug
 
 ---
 spring:
@@ -92,3 +93,15 @@ logging:
   level:
     com.evawova.preview.common.filter: warn
     root: info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+  packages-to-scan: com.evawova.preview
+  paths-to-match: /api/v1/**
