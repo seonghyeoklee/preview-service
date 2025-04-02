@@ -3,10 +3,12 @@ package com.evawova.preview.config;
 import com.evawova.preview.domain.interview.entity.InterviewCategory;
 import com.evawova.preview.domain.interview.entity.InterviewPrompt;
 import com.evawova.preview.domain.interview.entity.JobPosition;
+import com.evawova.preview.domain.interview.entity.Skill;
 import com.evawova.preview.domain.interview.model.*;
 import com.evawova.preview.domain.interview.repository.InterviewCategoryRepository;
 import com.evawova.preview.domain.interview.repository.InterviewPromptRepository;
 import com.evawova.preview.domain.interview.repository.JobPositionRepository;
+import com.evawova.preview.domain.interview.repository.SkillRepository;
 import com.evawova.preview.domain.user.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class InitService {
     private final InterviewPromptRepository interviewPromptRepository;
     private final InterviewCategoryRepository interviewCategoryRepository;
     private final JobPositionRepository jobPositionRepository;
+    private final SkillRepository skillRepository;
 
     @PostConstruct
     @Transactional
@@ -47,6 +52,11 @@ public class InitService {
         log.info("인터뷰 카테고리 데이터 초기화 시작...");
         initializeInterviewCategories();
         log.info("인터뷰 카테고리 데이터 초기화 완료");
+
+        // 스킬 데이터 초기화
+        log.info("스킬 데이터 초기화 시작...");
+        initializeSkills();
+        log.info("스킬 데이터 초기화 완료");
 
         // 직무 포지션 데이터 초기화
         log.info("직무 포지션 데이터 초기화 시작...");
@@ -103,302 +113,7 @@ public class InitService {
                     .build());
         }
 
-        // 직무 정보
-        for (JobRole role : JobRole.values()) {
-            String content = "{{직무}} 포지션에 대한 면접을 진행합니다. ";
-
-            // 직무별 내용 추가 - switch문 사용
-            switch (role) {
-                case FRONTEND_DEVELOPER:
-                    content += "JavaScript, React, Vue.js 등의 프론트엔드 기술과 UI/UX에 대한 이해도를 평가해주세요. "
-                            + "특히 컴포넌트 설계, 상태 관리, 최적화 기법, 반응형 디자인, 웹 접근성, 브라우저 호환성 등의 지식을 확인하고, "
-                            + "HTML/CSS 기술력과 함께 최신 웹 표준 및 ECMAScript 기능에 대한 이해도를 점검해주세요. "
-                            + "프로젝트 경험과 문제 해결 능력, 코드 품질에 대한 관점도 중요하게 평가해주세요.";
-                    break;
-                case BACKEND_DEVELOPER:
-                    content += "서버 아키텍처, 데이터베이스 설계, API 개발 경험에 중점을 두고 평가해주세요. "
-                            + "RESTful API, GraphQL 설계 원칙, 마이크로서비스 아키텍처, 서버 확장성, 성능 최적화 경험을 확인하고, "
-                            + "SQL/NoSQL 데이터베이스 지식, ORM 활용, 트랜잭션 관리, 쿼리 최적화에 대한 이해도를 점검해주세요. "
-                            + "또한 보안 모범 사례, 인증/인가 메커니즘, 로깅/모니터링 구현 경험, 비동기 처리, 캐싱 전략도 함께 평가해주세요.";
-                    break;
-                case FULLSTACK_DEVELOPER:
-                    content += "프론트엔드와 백엔드 양쪽의 기술적 역량과 전체 시스템 아키텍처에 대한 이해도를 평가해주세요. "
-                            + "프론트엔드 프레임워크(React, Vue, Angular 등)와 백엔드 기술(Node.js, Spring, Django 등)의 균형 있는 지식을 확인하고, "
-                            + "풀스택 개발 환경 구축 경험, API 설계와 통합 경험, 데이터베이스 모델링 능력을 점검해주세요. "
-                            + "클라이언트-서버 아키텍처의 전체 흐름 이해도, 성능 최적화 관점, 보안 지식, DevOps 경험도 함께 평가해주세요.";
-                    break;
-                case MOBILE_DEVELOPER:
-                    content += "모바일 앱 개발 기술과 사용자 경험, 성능 최적화 능력을 평가해주세요. "
-                            + "네이티브 개발(iOS/Android) 또는 크로스 플랫폼 프레임워크(React Native, Flutter) 활용 경험을 확인하고, "
-                            + "앱 아키텍처 패턴(MVC, MVVM 등), 상태 관리, 오프라인 지원, 애니메이션 구현 능력을 점검해주세요. "
-                            + "앱 배포 프로세스, 메모리 관리, 배터리 효율성, 푸시 알림 통합, 모바일 보안 지식, 다양한 디바이스 대응 경험도 함께 평가해주세요.";
-                    break;
-                case DEVOPS_DEVELOPER:
-                    content += "CI/CD 파이프라인, 클라우드 인프라, 시스템 모니터링 경험에 중점을 두고 평가해주세요. "
-                            + "Docker, Kubernetes 등 컨테이너 기술과 AWS, Azure, GCP 등 클라우드 서비스 활용 경험을 확인하고, "
-                            + "인프라를 코드로 관리하는 능력(IaC), Jenkins, GitLab CI 등 CI/CD 도구 구성 경험을 점검해주세요. "
-                            + "자동화 스크립팅 능력, 로깅/모니터링 시스템 구축, 트러블슈팅, 성능 튜닝, 장애 대응 프로세스, 보안 인프라 지식도 함께 평가해주세요.";
-                    break;
-                case DATA_SCIENTIST:
-                    content += "데이터 분석 기술, 머신러닝 모델 개발, 통계적 사고 능력을 평가해주세요. "
-                            + "Python, R 등 데이터 분석 도구 활용과 SQL, Pandas, NumPy 등 데이터 처리 기술 경험을 확인하고, "
-                            + "통계 분석 방법론, 가설 검정, A/B 테스트 설계 능력을 점검해주세요. "
-                            + "데이터 시각화 기술, 비지니스 문제를 데이터 문제로 전환하는 능력, 머신러닝 알고리즘 이해도, 모델 평가 방법, 빅데이터 처리 경험도 함께 평가해주세요.";
-                    break;
-                case AI_ENGINEER:
-                    content += "AI/ML 모델 개발, 딥러닝 프레임워크 활용 경험, 알고리즘 최적화 능력을 평가해주세요. "
-                            + "TensorFlow, PyTorch 등 딥러닝 프레임워크 활용과 컴퓨터 비전, NLP, 강화학습 등 AI 하위 분야 전문성을 확인하고, "
-                            + "모델 아키텍처 설계, 하이퍼파라미터 튜닝, 분산 학습 구현 경험을 점검해주세요. "
-                            + "실제 프로덕션 환경에서의 AI 모델 배포 경험, 모델 최적화 기법, 데이터 파이프라인 구축, 윤리적 AI 개발 관점도 함께 평가해주세요.";
-                    break;
-                case SECURITY_ENGINEER:
-                    content += "보안 취약점 분석, 보안 시스템 설계, 침해 대응 경험에 중점을 두고 평가해주세요. "
-                            + "취약점 스캐닝, 침투 테스트, 코드 보안 감사 경험과 네트워크 보안, 웹 애플리케이션 보안 지식을 확인하고, "
-                            + "보안 아키텍처 설계, 인증/인가 메커니즘 구현, 암호화 프로토콜 활용 능력을 점검해주세요. "
-                            + "보안 사고 대응 계획 수립, 포렌식 분석, 위협 인텔리전스 활용, 규정 준수(GDPR, PCI DSS 등), 보안 자동화 툴 개발 경험도 함께 평가해주세요.";
-                    break;
-                case QA_ENGINEER:
-                    content += "테스트 계획 수립, 자동화 테스트 구현, 품질 보증 프로세스에 대한 경험을 평가해주세요. "
-                            + "테스트 방법론(BDD, TDD 등), 테스트 케이스 설계, 테스트 우선순위 결정 능력을 확인하고, "
-                            + "Selenium, Cypress, JUnit 등 테스트 자동화 도구 활용 경험, CI/CD 환경에서의 테스트 통합 경험을 점검해주세요. "
-                            + "성능/부하 테스트, 보안 테스트, API 테스트, 모바일 테스트 경험과 버그 리포팅 프로세스, 결함 추적, 품질 메트릭 관리 능력도 함께 평가해주세요.";
-                    break;
-                case UI_UX_DESIGNER:
-                    content += "디자인 철학, 포트폴리오, 사용자 경험에 중점을 두고 평가해주세요. "
-                            + "사용자 중심 디자인 방법론, 와이어프레임/프로토타입 제작 경험, 인터랙션 디자인 능력을 확인하고, "
-                            + "Figma, Sketch, Adobe XD 등 디자인 툴 활용 스킬과 디자인 시스템 구축 경험을 점검해주세요. "
-                            + "정보 구조 설계, 사용성 테스트 진행 경험, 접근성 고려 사항, 반응형/적응형 디자인 지식, 시각적 계층 구조 이해도도 함께 평가해주세요.";
-                    break;
-                case GRAPHIC_DESIGNER:
-                    content += "디자인 철학, 포트폴리오, 사용자 경험에 중점을 두고 평가해주세요. "
-                            + "시각적 디자인 원칙, 타이포그래피, 색채 이론, 레이아웃 설계 능력을 확인하고, "
-                            + "Adobe Creative Suite(Photoshop, Illustrator, InDesign) 등 도구 활용 스킬과 브랜드 가이드라인 적용 경험을 점검해주세요. "
-                            + "디자인 트렌드 인식, 다양한 매체(인쇄물, 디지털, 소셜 미디어)에 맞는 디자인 경험, 스토리텔링 능력, 이미지 편집 기술도 함께 평가해주세요.";
-                    break;
-                case PRODUCT_DESIGNER:
-                    content += "디자인 철학, 포트폴리오, 사용자 경험에 중점을 두고 평가해주세요. "
-                            + "제품 디자인 프로세스, 사용자 리서치 방법론, 아이디어 스케치에서 최종 디자인까지의 워크플로우를 확인하고, "
-                            + "3D 모델링 소프트웨어 활용 능력, 프로토타이핑 경험, 제조 공정에 대한 이해도를 점검해주세요. "
-                            + "사용자 중심 접근법, 재료 지식, 지속가능성 고려 사항, 인체공학적 디자인 원칙, 제품 혁신 사례도 함께 평가해주세요.";
-                    break;
-                case BRAND_DESIGNER:
-                    content += "디자인 철학, 포트폴리오, 사용자 경험에 중점을 두고 평가해주세요. "
-                            + "브랜드 아이덴티티 개발, 로고 디자인, 브랜드 가이드라인 수립 경험을 확인하고, "
-                            + "시각적 스토리텔링 능력, 브랜드 자산 관리, 다양한 채널에서의 일관된 브랜드 표현 능력을 점검해주세요. "
-                            + "시장 트렌드 분석, 경쟁사 브랜드 분석, 타겟 오디언스 이해도, 브랜드 포지셔닝 전략, 브랜드 메시지 개발 경험도 함께 평가해주세요.";
-                    break;
-                case DIGITAL_MARKETER:
-                    content += "마케팅 전략, 캠페인 경험, 성과 측정 능력에 중점을 두고 평가해주세요. "
-                            + "SEO/SEM, 소셜 미디어 마케팅, 이메일 마케팅, 콘텐츠 마케팅 전략 수립 경험을 확인하고, "
-                            + "Google Analytics, Google Ads, Facebook Business Manager 등 디지털 마케팅 도구 활용 능력을 점검해주세요. "
-                            + "데이터 기반 의사결정, A/B 테스트 설계, 전환율 최적화, 디지털 광고 예산 관리, 퍼포먼스 마케팅 KPI 설정 및 분석 경험도 함께 평가해주세요.";
-                    break;
-                case CONTENT_MARKETER:
-                    content += "마케팅 전략, 캠페인 경험, 성과 측정 능력에 중점을 두고 평가해주세요. "
-                            + "콘텐츠 전략 수립, 콘텐츠 캘린더 관리, 다양한 포맷(블로그, 비디오, 팟캐스트, 인포그래픽) 콘텐츠 제작 경험을 확인하고, "
-                            + "타겟 오디언스에 맞는 스토리텔링 능력, SEO 최적화 글쓰기, 콘텐츠 배포 전략을 점검해주세요. "
-                            + "콘텐츠 성과 측정, 편집 일정 관리, 브랜드 톤앤보이스 유지, 트렌드 리서치, 인플루언서 협업 경험도 함께 평가해주세요.";
-                    break;
-                case BRAND_MARKETER:
-                    content += "마케팅 전략, 캠페인 경험, 성과 측정 능력에 중점을 두고 평가해주세요. "
-                            + "브랜드 전략 수립, 브랜드 포지셔닝, 브랜드 메시징 프레임워크 개발 경험을 확인하고, "
-                            + "브랜드 인지도 캠페인 기획, 브랜드 가치 전달, 고객 충성도 프로그램 개발 능력을 점검해주세요. "
-                            + "시장 및 경쟁사 분석, 브랜드 건강도 측정, 통합 마케팅 커뮤니케이션 계획, 브랜드 파트너십 관리, 위기 관리 전략도 함께 평가해주세요.";
-                    break;
-                case GROWTH_HACKER:
-                    content += "마케팅 전략, 캠페인 경험, 성과 측정 능력에 중점을 두고 평가해주세요. "
-                            + "사용자 획득 전략, 활성화 모델, 리텐션 최적화, 바이럴 루프 설계 경험을 확인하고, "
-                            + "실험 문화 구축, A/B 테스트 설계 및 분석, 사용자 행동 데이터 분석 능력을 점검해주세요. "
-                            + "고객 생애 가치 모델링, 퍼널 최적화, 그로스 해킹 기법, 제품-마케팅 연계 전략, 확장 가능한 채널 발굴 경험도 함께 평가해주세요.";
-                    break;
-                case HR_MANAGER:
-                    content += "인재 채용, 조직 문화 관리, 임직원 케어 경험에 중점을 두고 평가해주세요. "
-                            + "인재 채용 및 온보딩 프로세스 설계, 직원 평가 및 성과 관리 시스템 운영 경험을 확인하고, "
-                            + "조직 문화 구축 및 유지, 임직원 교육 프로그램 개발, 리더십 개발 계획 수립 능력을 점검해주세요. "
-                            + "인사 관련 법규 이해도, 보상 및 복리후생 체계 설계, 직원 관계 관리, 다양성 및 포용성 이니셔티브, 인재 유지 전략도 함께 평가해주세요.";
-                    break;
-                case FINANCE_MANAGER:
-                    content += "재무 분석, 예산 관리, 리스크 관리 능력에 중점을 두고 평가해주세요. "
-                            + "재무제표 분석, 현금흐름 관리, 재무 모델링 및 예측 경험을 확인하고, "
-                            + "예산 계획 수립 및 실행, 비용 통제, 자본 배분 의사결정 능력을 점검해주세요. "
-                            + "재무 리스크 평가, 투자 분석, 세무 계획 및 준수, 재무 보고 체계 개선, 핵심 성과 지표(KPI) 설정 및 모니터링 경험도 함께 평가해주세요.";
-                    break;
-                case BUSINESS_DEVELOPMENT:
-                    content += "사업 전략, 파트너십 구축, 시장 분석 능력에 중점을 두고 평가해주세요. "
-                            + "신규 사업 기회 발굴, 시장 조사 및 경쟁 분석, 사업 타당성 평가 경험을 확인하고, "
-                            + "전략적 파트너십 구축 및 관리, 계약 협상, 제휴 관계 유지 능력을 점검해주세요. "
-                            + "수익 모델 개발, 사업 확장 전략 수립, 성장 기회 우선순위화, 클라이언트 관계 구축, 판매 전략 이해도도 함께 평가해주세요.";
-                    break;
-                case PROJECT_MANAGER:
-                    content += "프로젝트 계획, 자원 관리, 이해관계자 커뮤니케이션 경험을 평가해주세요. "
-                            + "프로젝트 범위 정의, 일정 계획, WBS(작업 분할 구조) 작성 경험을 확인하고, "
-                            + "팀 리소스 할당 및 관리, 리스크 식별 및 완화 전략, 프로젝트 예산 통제 능력을 점검해주세요. "
-                            + "애자일/워터폴 등 프로젝트 방법론 적용, 이해관계자 관리, 프로젝트 보고 및 대시보드 활용, 문제 해결 및 결정, 타임라인 준수 경험도 함께 평가해주세요.";
-                    break;
-                default:
-                    content += "관련 업무 경험과 전문성에 중점을 두고 평가해주세요. "
-                            + "해당 분야의 핵심 기술 및 도구 활용 능력, 프로젝트 수행 경험, 문제 해결 방법론을 확인하고, "
-                            + "업계 트렌드 이해도, 전문 지식 습득 및 적용 능력, 관련 자격증이나 교육 이수 내역을 점검해주세요. "
-                            + "팀워크 및 협업 능력, 의사소통 스킬, 업무 우선순위 설정, 자기주도적 학습 태도, 직무 관련 윤리적 판단력도 함께 평가해주세요.";
-                    break;
-            }
-
-            prompts.add(InterviewPrompt.builder()
-                    .name(role.getDisplayName())
-                    .category(PromptCategory.JOB_INFO)
-                    .content(content)
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build());
-        }
-
-        // 경험 및 스킬
-        for (ExperienceLevel level : ExperienceLevel.values()) {
-            String content = "";
-            switch (level) {
-                case ENTRY:
-                    content = "{{경력_수준}}으로서의 기본적인 지식과 학습 능력에 대해 평가해주세요. 교육 배경, 프로젝트 경험, 기초 기술에 중점을 두고 질문해주세요.";
-                    break;
-                case JUNIOR:
-                    content = "{{경력_수준}}으로서의 실무 경험과 기술 적용 능력에 대해 평가해주세요. 간단한 문제 해결 능력과, 팀 협업 경험에 중점을 두고 질문해주세요.";
-                    break;
-                case MID_LEVEL:
-                    content = "{{경력_수준}}으로서의 심화된 기술 지식과 프로젝트 경험에 대해 평가해주세요. 복잡한 문제 해결 능력과 주도적인 업무 수행 경험에 중점을 두고 질문해주세요.";
-                    break;
-                case SENIOR:
-                    content = "{{경력_수준}}으로서의 깊은 전문성과 리더십 경험에 대해 평가해주세요. 아키텍처 설계, 기술 의사결정, 팀 멘토링 경험에 중점을 두고 질문해주세요.";
-                    break;
-                case EXECUTIVE:
-                    content = "{{경력_수준}}으로서의 전략적 사고와 조직 관리 능력에 대해 평가해주세요. 비즈니스 이해도, 의사결정 프로세스, 조직 성장에 대한 비전에 중점을 두고 질문해주세요.";
-                    break;
-            }
-
-            prompts.add(InterviewPrompt.builder()
-                    .name(level.getDisplayName())
-                    .category(PromptCategory.EXPERIENCE_SKILLS)
-                    .content(content)
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build());
-        }
-
-        // 난이도 및 스타일
-        for (InterviewDifficulty difficulty : InterviewDifficulty.values()) {
-            String content = "";
-            switch (difficulty) {
-                case BEGINNER:
-                    content = "{{난이도}} 수준의 면접을 진행합니다. 기초적인 개념과 지식을 확인하는 질문을 주로 하고, 면접자가 편안하게 답변할 수 있도록 안내해주세요.";
-                    break;
-                case INTERMEDIATE:
-                    content = "{{난이도}} 수준의 면접을 진행합니다. 실무 경험과 문제 해결 능력을 확인하는 질문을 주로 하고, 구체적인 사례를 요청해주세요.";
-                    break;
-                case ADVANCED:
-                    content = "{{난이도}} 수준의 면접을 진행합니다. 심층적인 기술 지식과 복잡한 문제 해결 능력을 확인하는 질문을 주로 하고, 다양한 상황에서의 의사결정 과정을 평가해주세요.";
-                    break;
-                case EXPERT:
-                    content = "{{난이도}} 수준의 면접을 진행합니다. 최신 기술 트렌드에 대한 이해와 고난도 기술적 문제에 대한 접근 방식을 확인하는 질문을 주로 하고, 혁신적인 해결책을 제시할 수 있는지 평가해주세요.";
-                    break;
-            }
-
-            prompts.add(InterviewPrompt.builder()
-                    .name(difficulty.getDisplayName())
-                    .category(PromptCategory.DIFFICULTY_STYLE)
-                    .content(content)
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build());
-        }
-
-        // 시간 및 질문
-        for (InterviewDuration duration : InterviewDuration.values()) {
-            String content = "{{면접_시간}} 동안 면접을 진행합니다. ";
-
-            switch (duration) {
-                case SHORT:
-                    content += "핵심적인 질문 위주로 간결하게 진행하며, 약 5-7개 정도의 주요 질문을 준비해주세요.";
-                    break;
-                case MEDIUM:
-                    content += "중요 주제에 대해 적절한 깊이로 질문하며, 약 10-12개 정도의 다양한 질문을 준비해주세요.";
-                    break;
-                case LONG:
-                    content += "주요 영역별로 심층적인 질문을 하며, 약 15-18개 정도의 포괄적인 질문을 준비해주세요.";
-                    break;
-                case EXTENDED:
-                    content += "모든 역량 영역을 종합적으로 평가하는 심층 질문을 하며, 약 20개 이상의 다각적인 질문을 준비해주세요.";
-                    break;
-            }
-
-            prompts.add(InterviewPrompt.builder()
-                    .name(duration.getDisplayName())
-                    .category(PromptCategory.TIME_QUESTIONS)
-                    .content(content)
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build());
-        }
-
-        // 인터뷰 프로세스
-        for (InterviewMode mode : InterviewMode.values()) {
-            String content = "";
-            switch (mode) {
-                case TEXT:
-                    content = "{{면접_모드}}로 진행합니다. 질문과 답변을 텍스트로 주고받으며, 명확하고 이해하기 쉬운 의사소통을 해주세요. 대화의 맥락을 잘 유지하며 면접을 진행해주세요.";
-                    break;
-                case VOICE:
-                    content = "{{면접_모드}}로 진행합니다. 자연스러운 대화를 통해 면접자의 의사소통 능력과 전문성을 평가해주세요. 음성 톤과 대화 흐름을 고려하여 면접을 진행해주세요.";
-                    break;
-            }
-
-            prompts.add(InterviewPrompt.builder()
-                    .name(mode.getDisplayName())
-                    .category(PromptCategory.INTERVIEW_PROCESS)
-                    .content(content)
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build());
-        }
-
-        // 언어 설정
-        for (InterviewLanguage language : InterviewLanguage.values()) {
-            String content = "";
-            switch (language) {
-                case KO:
-                    content = "면접은 {{언어}}로 진행됩니다. 면접자의 한국어 의사소통 능력을 평가하고, 전문 용어 사용의 정확성을 확인해주세요.";
-                    break;
-                case EN:
-                    content = "면접은 {{언어}}로 진행됩니다. 면접자의 영어 의사소통 능력을 평가하고, 국제적인 업무 환경에서의 의사소통 역량을 확인해주세요.";
-                    break;
-            }
-
-            prompts.add(InterviewPrompt.builder()
-                    .name(language.getDisplayName())
-                    .category(PromptCategory.LANGUAGE)
-                    .content(content)
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build());
-        }
-
-        // 마무리 지침
-        prompts.add(InterviewPrompt.builder()
-                .name("마무리 지침")
-                .category(PromptCategory.CLOSING)
-                .content("면접이 끝나기 전에 다음 사항을 확인해주세요:\n\n" +
-                        "1. 면접자가 추가 질문이 있는지 확인해주세요.\n" +
-                        "2. 면접 결과에 대한 피드백을 제공해주세요.\n" +
-                        "3. 다음 단계에 대한 안내를 해주세요.\n" +
-                        "4. 면접자의 시간과 노력에 대해 감사를 표해주세요.")
-                .active(true)
-                .createdAt(now)
-                .updatedAt(now)
-                .build());
-
+        // 기존 prompts 추가 로직...
         interviewPromptRepository.saveAll(prompts);
         log.info("{}개의 프롬프트 데이터가 초기화되었습니다.", prompts.size());
     }
@@ -425,6 +140,381 @@ public class InitService {
         log.info("{}개의 인터뷰 카테고리 데이터가 초기화되었습니다.", categories.size());
     }
 
+    private void initializeSkills() {
+        if (skillRepository.count() > 0) {
+            log.info("스킬 데이터가 이미 존재합니다. 초기화를 건너뜁니다.");
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        List<Skill> skills = new ArrayList<>();
+
+        // 개발 관련 스킬 - 백엔드
+        skills.add(createSkill("자바", "Java", now));
+        skills.add(createSkill("파이썬", "Python", now));
+        skills.add(createSkill("자바스크립트", "JavaScript", now));
+        skills.add(createSkill("타입스크립트", "TypeScript", now));
+        skills.add(createSkill("C#", "C#", now));
+        skills.add(createSkill("PHP", "PHP", now));
+        skills.add(createSkill("고", "Go", now));
+        skills.add(createSkill("루비", "Ruby", now));
+        skills.add(createSkill("코틀린", "Kotlin", now));
+        skills.add(createSkill("스칼라", "Scala", now));
+        skills.add(createSkill("러스트", "Rust", now));
+
+        // 백엔드 프레임워크
+        skills.add(createSkill("스프링", "Spring", now));
+        skills.add(createSkill("스프링 부트", "Spring Boot", now));
+        skills.add(createSkill("장고", "Django", now));
+        skills.add(createSkill("플라스크", "Flask", now));
+        skills.add(createSkill("익스프레스", "Express.js", now));
+        skills.add(createSkill("FastAPI", "FastAPI", now));
+        skills.add(createSkill("라라벨", "Laravel", now));
+        skills.add(createSkill("ASP.NET Core", "ASP.NET Core", now));
+        skills.add(createSkill("스프링 시큐리티", "Spring Security", now));
+        skills.add(createSkill("스프링 데이터", "Spring Data", now));
+        skills.add(createSkill("스프링 클라우드", "Spring Cloud", now));
+
+        // 데이터베이스
+        skills.add(createSkill("SQL", "SQL", now));
+        skills.add(createSkill("MySQL", "MySQL", now));
+        skills.add(createSkill("PostgreSQL", "PostgreSQL", now));
+        skills.add(createSkill("MongoDB", "MongoDB", now));
+        skills.add(createSkill("Redis", "Redis", now));
+        skills.add(createSkill("엘라스틱서치", "Elasticsearch", now));
+        skills.add(createSkill("오라클", "Oracle", now));
+        skills.add(createSkill("MS SQL 서버", "MS SQL Server", now));
+        skills.add(createSkill("Firebase", "Firebase", now));
+        skills.add(createSkill("DynamoDB", "DynamoDB", now));
+        skills.add(createSkill("카산드라", "Cassandra", now));
+
+        // ORM
+        skills.add(createSkill("JPA", "JPA", now));
+        skills.add(createSkill("하이버네이트", "Hibernate", now));
+        skills.add(createSkill("MyBatis", "MyBatis", now));
+        skills.add(createSkill("Sequelize", "Sequelize", now));
+        skills.add(createSkill("TypeORM", "TypeORM", now));
+        skills.add(createSkill("Prisma", "Prisma", now));
+
+        // API 개발
+        skills.add(createSkill("REST API", "REST API", now));
+        skills.add(createSkill("GraphQL", "GraphQL", now));
+        skills.add(createSkill("gRPC", "gRPC", now));
+        skills.add(createSkill("웹소켓", "WebSockets", now));
+        skills.add(createSkill("소켓.IO", "Socket.IO", now));
+        skills.add(createSkill("스웨거", "Swagger", now));
+        skills.add(createSkill("OpenAPI", "OpenAPI", now));
+
+        // 서버/인프라
+        skills.add(createSkill("도커", "Docker", now));
+        skills.add(createSkill("쿠버네티스", "Kubernetes", now));
+        skills.add(createSkill("AWS", "AWS", now));
+        skills.add(createSkill("GCP", "GCP", now));
+        skills.add(createSkill("Azure", "Azure", now));
+        skills.add(createSkill("Nginx", "Nginx", now));
+        skills.add(createSkill("Apache", "Apache", now));
+        skills.add(createSkill("리눅스", "Linux", now));
+        skills.add(createSkill("테라폼", "Terraform", now));
+        skills.add(createSkill("앤서블", "Ansible", now));
+        skills.add(createSkill("CloudFormation", "CloudFormation", now));
+
+        // 메시징/비동기 처리
+        skills.add(createSkill("카프카", "Kafka", now));
+        skills.add(createSkill("RabbitMQ", "RabbitMQ", now));
+        skills.add(createSkill("ActiveMQ", "ActiveMQ", now));
+        skills.add(createSkill("Redis Pub/Sub", "Redis Pub/Sub", now));
+        skills.add(createSkill("이벤트 소싱", "Event Sourcing", now));
+        skills.add(createSkill("CQRS", "CQRS", now));
+
+        // 테스트
+        skills.add(createSkill("JUnit", "JUnit", now));
+        skills.add(createSkill("모킹", "Mockito", now));
+        skills.add(createSkill("pytest", "pytest", now));
+        skills.add(createSkill("Jest", "Jest", now));
+        skills.add(createSkill("테스트 컨테이너", "Testcontainers", now));
+        skills.add(createSkill("통합 테스트", "Integration Testing", now));
+        skills.add(createSkill("E2E 테스트", "E2E Testing", now));
+
+        // 인증/보안
+        skills.add(createSkill("OAuth 2.0", "OAuth 2.0", now));
+        skills.add(createSkill("JWT", "JWT", now));
+        skills.add(createSkill("인증", "Authentication", now));
+        skills.add(createSkill("권한 부여", "Authorization", now));
+        skills.add(createSkill("OIDC", "OIDC", now));
+        skills.add(createSkill("보안 모범 사례", "Security Best Practices", now));
+
+        // 개발 관련 스킬 - 프론트엔드
+        skills.add(createSkill("HTML5", "HTML5", now));
+        skills.add(createSkill("CSS3", "CSS3", now));
+        skills.add(createSkill("리액트", "React", now));
+        skills.add(createSkill("뷰", "Vue.js", now));
+        skills.add(createSkill("앵귤러", "Angular", now));
+        skills.add(createSkill("스벨트", "Svelte", now));
+        skills.add(createSkill("넥스트.js", "Next.js", now));
+        skills.add(createSkill("넉스트.js", "Nuxt.js", now));
+        skills.add(createSkill("개츠비", "Gatsby", now));
+        skills.add(createSkill("리믹스", "Remix", now));
+        skills.add(createSkill("SolidJS", "SolidJS", now));
+
+        // 상태 관리
+        skills.add(createSkill("리덕스", "Redux", now));
+        skills.add(createSkill("리덕스 툴킷", "Redux Toolkit", now));
+        skills.add(createSkill("리코일", "Recoil", now));
+        skills.add(createSkill("주스탄트", "Zustand", now));
+        skills.add(createSkill("MobX", "MobX", now));
+        skills.add(createSkill("컨텍스트 API", "Context API", now));
+        skills.add(createSkill("XState", "XState", now));
+        skills.add(createSkill("Jotai", "Jotai", now));
+        skills.add(createSkill("Pinia", "Pinia", now));
+        skills.add(createSkill("Vuex", "Vuex", now));
+        skills.add(createSkill("Tanstack Query", "Tanstack Query", now));
+        skills.add(createSkill("SWR", "SWR", now));
+
+        // CSS 및 스타일링
+        skills.add(createSkill("Sass/SCSS", "Sass/SCSS", now));
+        skills.add(createSkill("Less", "Less", now));
+        skills.add(createSkill("스타일드 컴포넌트", "Styled Components", now));
+        skills.add(createSkill("이모션", "Emotion", now));
+        skills.add(createSkill("테일윈드 CSS", "Tailwind CSS", now));
+        skills.add(createSkill("CSS 모듈", "CSS Modules", now));
+        skills.add(createSkill("부트스트랩", "Bootstrap", now));
+        skills.add(createSkill("머티리얼 UI", "Material UI", now));
+        skills.add(createSkill("차크라 UI", "Chakra UI", now));
+        skills.add(createSkill("Ant Design", "Ant Design", now));
+        skills.add(createSkill("CSS-in-JS", "CSS-in-JS", now));
+
+        // 프론트엔드 테스트
+        skills.add(createSkill("리액트 테스팅 라이브러리", "React Testing Library", now));
+        skills.add(createSkill("사이프레스", "Cypress", now));
+        skills.add(createSkill("플레이라이트", "Playwright", now));
+        skills.add(createSkill("비테스트", "Vitest", now));
+        skills.add(createSkill("스토리북", "Storybook", now));
+        skills.add(createSkill("MSW", "MSW", now));
+
+        // 빌드 도구 및 번들러
+        skills.add(createSkill("웹팩", "Webpack", now));
+        skills.add(createSkill("바이트", "Vite", now));
+        skills.add(createSkill("바벨", "Babel", now));
+        skills.add(createSkill("이에스빌드", "esbuild", now));
+        skills.add(createSkill("롤업", "Rollup", now));
+        skills.add(createSkill("파셀", "Parcel", now));
+        skills.add(createSkill("터보팩", "Turbopack", now));
+        skills.add(createSkill("Lerna", "Lerna", now));
+        skills.add(createSkill("NX", "NX", now));
+
+        // 웹 성능 최적화
+        skills.add(createSkill("코드 스플리팅", "Code Splitting", now));
+        skills.add(createSkill("지연 로딩", "Lazy Loading", now));
+        skills.add(createSkill("메모이제이션", "Memoization", now));
+        skills.add(createSkill("번들 분석", "Bundle Analysis", now));
+        skills.add(createSkill("이미지 최적화", "Image Optimization", now));
+        skills.add(createSkill("서버 사이드 렌더링", "Server-side Rendering", now));
+        skills.add(createSkill("정적 사이트 생성", "Static Site Generation", now));
+        skills.add(createSkill("점진적 향상", "Progressive Enhancement", now));
+
+        // 웹 표준/접근성
+        skills.add(createSkill("반응형 디자인", "Responsive Design", now));
+        skills.add(createSkill("접근성", "Accessibility (a11y)", now));
+        skills.add(createSkill("ARIA", "ARIA", now));
+        skills.add(createSkill("PWA", "PWA", now));
+        skills.add(createSkill("웹 컴포넌트", "Web Components", now));
+        skills.add(createSkill("시맨틱 HTML", "Semantic HTML", now));
+        skills.add(createSkill("WCAG", "WCAG", now));
+
+        // 모바일 개발 스킬
+        skills.add(createSkill("안드로이드", "Android", now));
+        skills.add(createSkill("iOS", "iOS", now));
+        skills.add(createSkill("스위프트", "Swift", now));
+        skills.add(createSkill("코틀린 안드로이드", "Kotlin for Android", now));
+        skills.add(createSkill("리액트 네이티브", "React Native", now));
+        skills.add(createSkill("플러터", "Flutter", now));
+        skills.add(createSkill("다트", "Dart", now));
+        skills.add(createSkill("Ionic", "Ionic", now));
+        skills.add(createSkill("Capacitor", "Capacitor", now));
+        skills.add(createSkill("SwiftUI", "SwiftUI", now));
+        skills.add(createSkill("Jetpack Compose", "Jetpack Compose", now));
+        skills.add(createSkill("Objective-C", "Objective-C", now));
+
+        // 디자인 관련 스킬 - UI/UX 디자인
+        skills.add(createSkill("피그마", "Figma", now));
+        skills.add(createSkill("스케치", "Sketch", now));
+        skills.add(createSkill("어도비 XD", "Adobe XD", now));
+        skills.add(createSkill("프로토파이", "Protopie", now));
+        skills.add(createSkill("ProtoPie", "ProtoPie", now));
+        skills.add(createSkill("인비전", "InVision", now));
+        skills.add(createSkill("Axure RP", "Axure RP", now));
+        skills.add(createSkill("프레이머", "Framer", now));
+        skills.add(createSkill("원노트", "Whimsical", now));
+
+        // 그래픽 디자인
+        skills.add(createSkill("포토샵", "Photoshop", now));
+        skills.add(createSkill("일러스트레이터", "Illustrator", now));
+        skills.add(createSkill("어도비 애프터 이펙트", "Adobe After Effects", now));
+        skills.add(createSkill("애니메이션", "Animation", now));
+        skills.add(createSkill("모션 그래픽", "Motion Graphics", now));
+        skills.add(createSkill("타이포그래피", "Typography", now));
+        skills.add(createSkill("컬러 이론", "Color Theory", now));
+        skills.add(createSkill("로고 디자인", "Logo Design", now));
+        skills.add(createSkill("아이콘 디자인", "Icon Design", now));
+
+        // UX 디자인
+        skills.add(createSkill("UI 디자인", "UI Design", now));
+        skills.add(createSkill("UX 디자인", "UX Design", now));
+        skills.add(createSkill("사용자 리서치", "User Research", now));
+        skills.add(createSkill("사용성 테스트", "Usability Testing", now));
+        skills.add(createSkill("인터랙션 디자인", "Interaction Design", now));
+        skills.add(createSkill("와이어프레이밍", "Wireframing", now));
+        skills.add(createSkill("프로토타이핑", "Prototyping", now));
+        skills.add(createSkill("정보 구조", "Information Architecture", now));
+        skills.add(createSkill("사용자 경험 매핑", "User Journey Mapping", now));
+        skills.add(createSkill("인물 페르소나", "Persona Creation", now));
+        skills.add(createSkill("A/B 테스트", "A/B Testing", now));
+        skills.add(createSkill("모바일 디자인", "Mobile Design", now));
+        skills.add(createSkill("웹 디자인", "Web Design", now));
+
+        // 디자인 시스템
+        skills.add(createSkill("디자인 시스템", "Design Systems", now));
+        skills.add(createSkill("브랜드 디자인", "Brand Design", now));
+        skills.add(createSkill("브랜드 가이드라인", "Brand Guidelines", now));
+        skills.add(createSkill("스타일 가이드", "Style Guides", now));
+        skills.add(createSkill("컴포넌트 라이브러리", "Component Libraries", now));
+        skills.add(createSkill("디자인 토큰", "Design Tokens", now));
+
+        // 마케팅 관련 스킬
+        skills.add(createSkill("검색 엔진 최적화", "SEO", now));
+        skills.add(createSkill("검색 엔진 마케팅", "SEM", now));
+        skills.add(createSkill("소셜 미디어 마케팅", "Social Media Marketing", now));
+        skills.add(createSkill("콘텐츠 마케팅", "Content Marketing", now));
+        skills.add(createSkill("인플루언서 마케팅", "Influencer Marketing", now));
+        skills.add(createSkill("이메일 마케팅", "Email Marketing", now));
+        skills.add(createSkill("디지털 광고", "Digital Advertising", now));
+        skills.add(createSkill("마케팅 자동화", "Marketing Automation", now));
+        skills.add(createSkill("퍼포먼스 마케팅", "Performance Marketing", now));
+        skills.add(createSkill("애널리틱스", "Analytics", now));
+        skills.add(createSkill("그로스 해킹", "Growth Hacking", now));
+        skills.add(createSkill("브랜드 마케팅", "Brand Marketing", now));
+        skills.add(createSkill("CRM", "CRM", now));
+
+        // 마케팅 플랫폼/툴
+        skills.add(createSkill("구글 애널리틱스", "Google Analytics", now));
+        skills.add(createSkill("구글 태그 매니저", "Google Tag Manager", now));
+        skills.add(createSkill("구글 애즈", "Google Ads", now));
+        skills.add(createSkill("페이스북 광고", "Facebook Ads", now));
+        skills.add(createSkill("인스타그램 광고", "Instagram Ads", now));
+        skills.add(createSkill("트위터 광고", "Twitter Ads", now));
+        skills.add(createSkill("링크드인 광고", "LinkedIn Ads", now));
+        skills.add(createSkill("틱톡 광고", "TikTok Ads", now));
+        skills.add(createSkill("훅", "Hootsuite", now));
+        skills.add(createSkill("버퍼", "Buffer", now));
+        skills.add(createSkill("메일침프", "Mailchimp", now));
+        skills.add(createSkill("센드그리드", "SendGrid", now));
+        skills.add(createSkill("HubSpot", "HubSpot", now));
+        skills.add(createSkill("Marketo", "Marketo", now));
+        skills.add(createSkill("세일즈포스", "Salesforce", now));
+        skills.add(createSkill("아하프스", "Ahrefs", now));
+        skills.add(createSkill("SEMrush", "SEMrush", now));
+        skills.add(createSkill("Moz", "Moz", now));
+
+        // 데이터 분석
+        skills.add(createSkill("데이터 분석", "Data Analysis", now));
+        skills.add(createSkill("GA4", "GA4", now));
+        skills.add(createSkill("핫자", "Hotjar", now));
+        skills.add(createSkill("크레이지 에그", "Crazy Egg", now));
+        skills.add(createSkill("컨버전 최적화", "Conversion Rate Optimization", now));
+        skills.add(createSkill("키워드 리서치", "Keyword Research", now));
+        skills.add(createSkill("마케팅 ROI", "Marketing ROI", now));
+        skills.add(createSkill("대시보드", "Dashboards", now));
+        skills.add(createSkill("ABM", "Account-based Marketing", now));
+        skills.add(createSkill("퍼널 분석", "Funnel Analysis", now));
+
+        // 경영 관련 스킬
+        skills.add(createSkill("프로젝트 관리", "Project Management", now));
+        skills.add(createSkill("애자일", "Agile", now));
+        skills.add(createSkill("스크럼", "Scrum", now));
+        skills.add(createSkill("칸반", "Kanban", now));
+        skills.add(createSkill("린", "Lean", now));
+        skills.add(createSkill("워터폴", "Waterfall", now));
+        skills.add(createSkill("PMO", "PMO", now));
+        skills.add(createSkill("리스크 관리", "Risk Management", now));
+        skills.add(createSkill("문제 해결", "Problem Solving", now));
+        skills.add(createSkill("비즈니스 전략", "Business Strategy", now));
+        skills.add(createSkill("시장 조사", "Market Research", now));
+        skills.add(createSkill("데이터 기반 의사결정", "Data-driven Decision Making", now));
+
+        // 경영 도구
+        skills.add(createSkill("지라", "Jira", now));
+        skills.add(createSkill("컨플루언스", "Confluence", now));
+        skills.add(createSkill("아사나", "Asana", now));
+        skills.add(createSkill("트렐로", "Trello", now));
+        skills.add(createSkill("먼데이닷컴", "Monday.com", now));
+        skills.add(createSkill("노션", "Notion", now));
+        skills.add(createSkill("클릭업", "ClickUp", now));
+        skills.add(createSkill("마이크로소프트 프로젝트", "Microsoft Project", now));
+        skills.add(createSkill("슬랙", "Slack", now));
+        skills.add(createSkill("마이크로소프트 팀즈", "Microsoft Teams", now));
+        skills.add(createSkill("줌", "Zoom", now));
+        skills.add(createSkill("미로", "Miro", now));
+
+        // 인사/조직
+        skills.add(createSkill("인사 관리", "HR Management", now));
+        skills.add(createSkill("채용", "Recruiting", now));
+        skills.add(createSkill("온보딩", "Onboarding", now));
+        skills.add(createSkill("인재 개발", "Talent Development", now));
+        skills.add(createSkill("성과 관리", "Performance Management", now));
+        skills.add(createSkill("문화 구축", "Culture Building", now));
+        skills.add(createSkill("리더십", "Leadership", now));
+        skills.add(createSkill("팀 관리", "Team Management", now));
+        skills.add(createSkill("갈등 해결", "Conflict Resolution", now));
+        skills.add(createSkill("코칭", "Coaching", now));
+        skills.add(createSkill("다양성과 포용", "Diversity & Inclusion", now));
+        skills.add(createSkill("원격 팀 관리", "Remote Team Management", now));
+
+        // 재무/운영
+        skills.add(createSkill("재무 분석", "Financial Analysis", now));
+        skills.add(createSkill("예산 관리", "Budget Management", now));
+        skills.add(createSkill("원가 분석", "Cost Analysis", now));
+        skills.add(createSkill("수익 모델링", "Revenue Modeling", now));
+        skills.add(createSkill("비즈니스 모델 개발", "Business Model Development", now));
+        skills.add(createSkill("운영 관리", "Operations Management", now));
+        skills.add(createSkill("공급망 관리", "Supply Chain Management", now));
+        skills.add(createSkill("린 운영", "Lean Operations", now));
+        skills.add(createSkill("품질 관리", "Quality Management", now));
+        skills.add(createSkill("벤더 관리", "Vendor Management", now));
+        skills.add(createSkill("계약 협상", "Contract Negotiation", now));
+
+        // 데이터 과학/AI
+        skills.add(createSkill("데이터 과학", "Data Science", now));
+        skills.add(createSkill("머신러닝", "Machine Learning", now));
+        skills.add(createSkill("인공지능", "Artificial Intelligence", now));
+        skills.add(createSkill("딥러닝", "Deep Learning", now));
+        skills.add(createSkill("자연어 처리", "Natural Language Processing", now));
+        skills.add(createSkill("데이터 시각화", "Data Visualization", now));
+        skills.add(createSkill("통계 분석", "Statistical Analysis", now));
+        skills.add(createSkill("예측 모델링", "Predictive Modeling", now));
+        skills.add(createSkill("판다스", "Pandas", now));
+        skills.add(createSkill("넘파이", "NumPy", now));
+        skills.add(createSkill("텐서플로우", "TensorFlow", now));
+        skills.add(createSkill("파이토치", "PyTorch", now));
+        skills.add(createSkill("생성형 AI", "Generative AI", now));
+        skills.add(createSkill("프롬프트 엔지니어링", "Prompt Engineering", now));
+        skills.add(createSkill("A/B 테스트 설계", "A/B Test Design", now));
+        skills.add(createSkill("빅데이터", "Big Data", now));
+        skills.add(createSkill("하둡", "Hadoop", now));
+        skills.add(createSkill("스파크", "Spark", now));
+
+        skillRepository.saveAll(skills);
+        log.info("{}개의 스킬 데이터가 초기화되었습니다.", skills.size());
+    }
+
+    private Skill createSkill(String name, String nameEn, LocalDateTime now) {
+        return Skill.builder()
+                .name(name)
+                .nameEn(nameEn)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+    }
+
     private void initializeJobPositions() {
         if (jobPositionRepository.count() > 0) {
             log.info("직무 포지션 데이터가 이미 존재합니다. 초기화를 건너뜁니다.");
@@ -432,74 +522,150 @@ public class InitService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        List<JobPosition> positions = List.of(
-                JobPosition.builder().positionId("backend_developer").role(JobRole.BACKEND_DEVELOPER).title("백엔드 개발자")
-                        .description("서버, API, 데이터베이스 설계 및 관리 등 서비스의 핵심 기능을 담당").icon("FontAwesomeIcons.server")
-                        .skills(List.of("Java", "Python", "Node.js", "Spring", "Django", "Express", "MySQL", "MongoDB"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("frontend_developer").role(JobRole.FRONTEND_DEVELOPER)
-                        .title("프론트엔드 개발자").description("웹 사이트, 애플리케이션의 사용자 인터페이스 및 사용자 경험 개발")
-                        .icon("FontAwesomeIcons.display")
-                        .skills(List.of("HTML", "CSS", "JavaScript", "React", "Vue", "Angular", "TypeScript"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("fullstack_developer").role(JobRole.FULLSTACK_DEVELOPER)
-                        .title("풀스택 개발자").description("프론트엔드와 백엔드 개발을 모두 수행하는 종합적인 개발 역할")
-                        .icon("FontAwesomeIcons.layerGroup")
-                        .skills(List.of("JavaScript", "TypeScript", "React", "Node.js", "Database", "REST API"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("mobile_developer").role(JobRole.MOBILE_DEVELOPER).title("모바일 개발자")
-                        .description("iOS, Android 플랫폼 앱 개발 및 배포, 유지보수를 담당").icon("FontAwesomeIcons.mobileScreen")
-                        .skills(List.of("Android", "iOS", "Swift", "Kotlin", "React Native", "Flutter")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("devops_developer").role(JobRole.DEVOPS_DEVELOPER).title("DevOps 엔지니어")
-                        .description("개발 및 운영 프로세스 자동화, 인프라 관리, CI/CD 파이프라인 구축").icon("FontAwesomeIcons.gears")
-                        .skills(List.of("Docker", "Kubernetes", "AWS", "Jenkins", "Git", "CI/CD")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("data_scientist").role(JobRole.DATA_SCIENTIST).title("데이터 엔지니어")
-                        .description("데이터 파이프라인 구축, 데이터 인프라 관리 및 최적화").icon("FontAwesomeIcons.database")
-                        .skills(List.of("SQL", "Hadoop", "Spark", "ETL", "Data Warehousing", "Python")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("ai_engineer").role(JobRole.AI_ENGINEER).title("AI/ML 엔지니어")
-                        .description("머신러닝 모델 개발, 학습, 배포 및 성능 최적화").icon("FontAwesomeIcons.robot")
-                        .skills(List.of("Python", "TensorFlow", "PyTorch", "Scikit-learn", "Deep Learning"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("security_engineer").role(JobRole.SECURITY_ENGINEER).title("보안 엔지니어")
-                        .description("시스템, 네트워크, 애플리케이션의 보안 취약점 분석 및 대응").icon("FontAwesomeIcons.shieldHalved")
-                        .skills(List.of("Network Security", "Penetration Testing", "Security Protocols")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("qa_engineer").role(JobRole.QA_ENGINEER).title("QA 엔지니어")
-                        .description("소프트웨어 품질 보증, 테스트 자동화, 버그 추적 및 보고").icon("FontAwesomeIcons.clipboardCheck")
-                        .skills(List.of("Manual Testing", "Automated Testing", "Test Cases", "Bug Tracking"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("ui_ux_designer").role(JobRole.UI_UX_DESIGNER).title("UI/UX 디자이너")
-                        .description("사용자 인터페이스/경험 디자인, 와이어프레임, 프로토타입 제작").icon("FontAwesomeIcons.penRuler")
-                        .skills(List.of("Figma", "Sketch", "Adobe XD", "User Research", "Prototyping")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("graphic_designer").role(JobRole.GRAPHIC_DESIGNER).title("그래픽 디자이너")
-                        .description("브랜드 아이덴티티, 마케팅 자료, 웹/앱 그래픽 디자인").icon("FontAwesomeIcons.palette")
-                        .skills(List.of("Photoshop", "Illustrator", "Typography", "Layout Design")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("product_designer").role(JobRole.PRODUCT_DESIGNER).title("제품 디자이너")
-                        .description("제품 기획, 디자인, 프로토타입 제작 및 사용자 테스트").icon("FontAwesomeIcons.objectGroup")
-                        .skills(List.of("Product Thinking", "Design Systems", "User Testing", "Prototyping"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("digital_marketer").role(JobRole.DIGITAL_MARKETER).title("디지털 마케터")
-                        .description("온라인 마케팅 전략 수립, 캠페인 기획 및 성과 분석").icon("FontAwesomeIcons.chartLine")
-                        .skills(List.of("SEO", "SEM", "Social Media Marketing", "Analytics")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("growth_hacker").role(JobRole.GROWTH_HACKER).title("그로스 해커")
-                        .description("제품/서비스 성장을 위한 데이터 기반 전략 수립 및 실행").icon("FontAwesomeIcons.rocket")
-                        .skills(List.of("A/B Testing", "User Acquisition", "Retention Strategy", "Analytics"))
-                        .createdAt(now).updatedAt(now).build(),
-                JobPosition.builder().positionId("hr_manager").role(JobRole.HR_MANAGER).title("인사 담당자")
-                        .description("채용, 교육, 성과 관리 등 인적 자원 관리 업무 수행").icon("FontAwesomeIcons.userGroup")
-                        .skills(List.of("Recruiting", "HR Policies", "Employee Relations", "Training")).createdAt(now)
-                        .updatedAt(now).build(),
-                JobPosition.builder().positionId("project_manager").role(JobRole.PROJECT_MANAGER).title("프로젝트 관리자")
-                        .description("프로젝트 기획, 일정 관리, 리소스 관리 및 이해관계자 소통").icon("FontAwesomeIcons.listCheck")
-                        .skills(List.of("Project Planning", "Agile", "Scrum", "Risk Management",
-                                "Stakeholder Communication"))
-                        .createdAt(now).updatedAt(now).build());
+        List<JobPosition> positions = new ArrayList<>();
+
+        // 스킬 맵 생성 (영문명 -> 엔티티)
+        Map<String, Skill> skillMap = skillRepository.findAll().stream()
+                .collect(Collectors.toMap(Skill::getNameEn, skill -> skill));
+
+        // 카테고리 맵 생성 (타입 -> 엔티티)
+        Map<InterviewType, InterviewCategory> categoryMap = interviewCategoryRepository.findAll().stream()
+                .collect(Collectors.toMap(InterviewCategory::getType, category -> category));
+
+        // 백엔드 개발자
+        JobPosition backendDev = JobPosition.builder()
+                .positionId("backend_developer")
+                .role(JobRole.BACKEND_DEVELOPER)
+                .title("백엔드 개발자")
+                .titleEn("Backend Developer")
+                .description("서버, API, 데이터베이스 설계 및 관리 등 서비스의 핵심 기능을 담당")
+                .descriptionEn(
+                        "Responsible for server-side logic, API development, database design, and managing the core functions of services")
+                .icon("FontAwesomeIcons.server")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // IT 개발 카테고리에 연결
+        backendDev.setCategory(categoryMap.get(InterviewType.TECHNICAL));
+
+        // 스킬 연결
+        List<String> backendSkillNames = List.of("Java", "Python", "Spring", "Spring Boot", "Django", "SQL", "MySQL",
+                "PostgreSQL", "MongoDB", "REST API", "GraphQL", "Docker", "Kubernetes", "AWS");
+        backendSkillNames.forEach(skillName -> {
+            Skill skill = skillMap.get(skillName);
+            if (skill != null) {
+                backendDev.getSkills().add(skill);
+            }
+        });
+        positions.add(backendDev);
+
+        // 프론트엔드 개발자
+        JobPosition frontendDev = JobPosition.builder()
+                .positionId("frontend_developer")
+                .role(JobRole.FRONTEND_DEVELOPER)
+                .title("프론트엔드 개발자")
+                .titleEn("Frontend Developer")
+                .description("웹 사이트, 애플리케이션의 사용자 인터페이스 및 사용자 경험 개발")
+                .descriptionEn("Developing user interfaces and user experiences for websites and applications")
+                .icon("FontAwesomeIcons.display")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // IT 개발 카테고리에 연결
+        frontendDev.setCategory(categoryMap.get(InterviewType.TECHNICAL));
+
+        // 스킬 연결
+        List<String> frontendSkillNames = List.of("JavaScript", "TypeScript", "React", "Vue.js", "Angular", "HTML5",
+                "CSS3", "Tailwind CSS", "Next.js");
+        frontendSkillNames.forEach(skillName -> {
+            Skill skill = skillMap.get(skillName);
+            if (skill != null) {
+                frontendDev.getSkills().add(skill);
+            }
+        });
+        positions.add(frontendDev);
+
+        // 디자이너
+        JobPosition designer = JobPosition.builder()
+                .positionId("ui_ux_designer")
+                .role(JobRole.UI_UX_DESIGNER)
+                .title("UI/UX 디자이너")
+                .titleEn("UI/UX Designer")
+                .description("사용자 인터페이스/경험 디자인, 와이어프레임, 프로토타입 제작")
+                .descriptionEn("Designing user interfaces/experiences, creating wireframes and prototypes")
+                .icon("FontAwesomeIcons.penRuler")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // 디자인 카테고리에 연결
+        designer.setCategory(categoryMap.get(InterviewType.DESIGN));
+
+        // 스킬 연결
+        List<String> designSkillNames = List.of("Figma", "Sketch", "Adobe XD", "Photoshop", "Illustrator", "UI Design",
+                "UX Design", "Wireframing", "Prototyping");
+        designSkillNames.forEach(skillName -> {
+            Skill skill = skillMap.get(skillName);
+            if (skill != null) {
+                designer.getSkills().add(skill);
+            }
+        });
+        positions.add(designer);
+
+        // 마케터
+        JobPosition marketer = JobPosition.builder()
+                .positionId("digital_marketer")
+                .role(JobRole.DIGITAL_MARKETER)
+                .title("디지털 마케터")
+                .titleEn("Digital Marketer")
+                .description("온라인 마케팅 전략 수립, 캠페인 기획 및 성과 분석")
+                .descriptionEn("Developing online marketing strategies, planning campaigns, and analyzing performance")
+                .icon("FontAwesomeIcons.chartLine")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // 마케팅 카테고리에 연결
+        marketer.setCategory(categoryMap.get(InterviewType.MARKETING));
+
+        // 스킬 연결
+        List<String> marketingSkillNames = List.of("SEO", "Social Media Marketing", "Content Marketing",
+                "Google Analytics", "Growth Hacking", "Email Marketing", "Digital Advertising");
+        marketingSkillNames.forEach(skillName -> {
+            Skill skill = skillMap.get(skillName);
+            if (skill != null) {
+                marketer.getSkills().add(skill);
+            }
+        });
+        positions.add(marketer);
+
+        // 프로젝트 매니저
+        JobPosition projectManager = JobPosition.builder()
+                .positionId("project_manager")
+                .role(JobRole.PROJECT_MANAGER)
+                .title("프로젝트 관리자")
+                .titleEn("Project Manager")
+                .description("프로젝트 기획, 일정 관리, 리소스 관리 및 이해관계자 소통")
+                .descriptionEn("Planning projects, managing schedules, resources, and communicating with stakeholders")
+                .icon("FontAwesomeIcons.listCheck")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // 경영지원 카테고리에 연결
+        projectManager.setCategory(categoryMap.get(InterviewType.BUSINESS));
+
+        // 스킬 연결
+        List<String> pmSkillNames = List.of("Project Management", "Agile", "Scrum", "Leadership", "Jira", "Notion");
+        pmSkillNames.forEach(skillName -> {
+            Skill skill = skillMap.get(skillName);
+            if (skill != null) {
+                projectManager.getSkills().add(skill);
+            }
+        });
+        positions.add(projectManager);
 
         jobPositionRepository.saveAll(positions);
         log.info("{}개의 직무 포지션 데이터가 초기화되었습니다.", positions.size());
