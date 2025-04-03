@@ -125,16 +125,175 @@ public class InitService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        List<InterviewCategory> categories = List.of(
-                InterviewCategory.builder().icon("Icons.computer").title("IT 개발").description("소프트웨어/하드웨어 개발 직군")
-                        .type(InterviewType.TECHNICAL).createdAt(now).updatedAt(now).build(),
-                InterviewCategory.builder().icon("Icons.design_services").title("디자인")
-                        .description("UI/UX, 그래픽, 제품 디자인 직군").type(InterviewType.DESIGN).createdAt(now).updatedAt(now)
-                        .build(),
-                InterviewCategory.builder().icon("Icons.campaign").title("마케팅").description("디지털 마케팅, 콘텐츠 기획 직군")
-                        .type(InterviewType.MARKETING).createdAt(now).updatedAt(now).build(),
-                InterviewCategory.builder().icon("Icons.business").title("경영지원").description("인사, 재무, 행정 지원 직군")
-                        .type(InterviewType.BUSINESS).createdAt(now).updatedAt(now).build());
+        List<InterviewCategory> categories = new ArrayList<>();
+
+        // IT 개발 직군 세분화
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.code")
+                .title("백엔드 개발")
+                .titleEn("Backend Development")
+                .description("서버, API, 데이터베이스 설계 및 개발을 담당하는 직군")
+                .descriptionEn("Roles responsible for server-side logic, API development, and database design")
+                .type(InterviewType.BACKEND)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.web")
+                .title("프론트엔드 개발")
+                .titleEn("Frontend Development")
+                .description("웹/앱 인터페이스 및 사용자 경험 구현을 담당하는 직군")
+                .descriptionEn("Roles responsible for implementing user interfaces and experiences")
+                .type(InterviewType.FRONTEND)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.all_inclusive")
+                .title("풀스택 개발")
+                .titleEn("Full Stack Development")
+                .description("프론트엔드와 백엔드 모두 개발 가능한 직군")
+                .descriptionEn("Roles covering both frontend and backend development")
+                .type(InterviewType.FULLSTACK)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.phone_android")
+                .title("모바일 앱 개발")
+                .titleEn("Mobile App Development")
+                .description("iOS, Android, 크로스 플랫폼 앱 개발을 담당하는 직군")
+                .descriptionEn("Roles focused on iOS, Android, and cross-platform app development")
+                .type(InterviewType.MOBILE)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.cloud")
+                .title("데브옵스/인프라")
+                .titleEn("DevOps/Infrastructure")
+                .description("개발 및 운영 자동화, 클라우드 인프라 관리를 담당하는 직군")
+                .descriptionEn("Roles managing automation, deployment, and cloud infrastructure")
+                .type(InterviewType.DEVOPS)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.storage")
+                .title("데이터 엔지니어링")
+                .titleEn("Data Engineering")
+                .description("데이터 파이프라인 구축, ETL 프로세스, 데이터 웨어하우스 관리를 담당하는 직군")
+                .descriptionEn("Roles building data pipelines, ETL processes, and managing data warehouses")
+                .type(InterviewType.DATA_ENGINEERING)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.analytics")
+                .title("데이터 사이언스/AI")
+                .titleEn("Data Science/AI")
+                .description("머신러닝, 딥러닝, 데이터 분석, AI 모델 개발을 담당하는 직군")
+                .descriptionEn("Roles focused on machine learning, deep learning, and AI model development")
+                .type(InterviewType.DATA_SCIENCE)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.sports_esports")
+                .title("게임 개발")
+                .titleEn("Game Development")
+                .description("게임 클라이언트/서버 개발, 그래픽 엔진 활용을 담당하는 직군")
+                .descriptionEn("Roles developing game clients, servers, and utilizing graphics engines")
+                .type(InterviewType.GAME_DEVELOPMENT)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.link")
+                .title("블록체인 개발")
+                .titleEn("Blockchain Development")
+                .description("블록체인 프로토콜, 스마트 컨트랙트, DApp 개발을 담당하는 직군")
+                .descriptionEn("Roles developing blockchain protocols, smart contracts, and decentralized applications")
+                .type(InterviewType.BLOCKCHAIN)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.memory")
+                .title("임베디드/IoT")
+                .titleEn("Embedded/IoT")
+                .description("임베디드 시스템, IoT 기기, 펌웨어 개발을 담당하는 직군")
+                .descriptionEn("Roles developing embedded systems, IoT devices, and firmware")
+                .type(InterviewType.EMBEDDED)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.bug_report")
+                .title("QA/테스트")
+                .titleEn("QA/Testing")
+                .description("품질 보증, 자동화 테스트, 테스트 프레임워크 개발을 담당하는 직군")
+                .descriptionEn("Roles ensuring quality assurance and developing test automation")
+                .type(InterviewType.QA)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.security")
+                .title("보안 엔지니어링")
+                .titleEn("Security Engineering")
+                .description("어플리케이션 보안, 인프라 보안, 취약점 분석을 담당하는 직군")
+                .descriptionEn(
+                        "Roles focused on application security, infrastructure security, and vulnerability analysis")
+                .type(InterviewType.SECURITY)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        // 기존 카테고리 (디자인, 마케팅, 경영지원)
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.design_services")
+                .title("디자인")
+                .titleEn("Design")
+                .description("UI/UX, 그래픽, 제품 디자인 직군")
+                .descriptionEn("UI/UX, graphic, and product design roles")
+                .type(InterviewType.DESIGN)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.campaign")
+                .title("마케팅")
+                .titleEn("Marketing")
+                .description("디지털 마케팅, 콘텐츠 기획 직군")
+                .descriptionEn("Digital marketing and content planning roles")
+                .type(InterviewType.MARKETING)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        categories.add(InterviewCategory.builder()
+                .icon("Icons.business")
+                .title("경영지원")
+                .titleEn("Business Operations")
+                .description("인사, 재무, 행정 지원 직군")
+                .descriptionEn("HR, finance, and administrative support roles")
+                .type(InterviewType.BUSINESS)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
 
         interviewCategoryRepository.saveAll(categories);
         log.info("{}개의 인터뷰 카테고리 데이터가 초기화되었습니다.", categories.size());
@@ -532,142 +691,645 @@ public class InitService {
         Map<InterviewType, InterviewCategory> categoryMap = interviewCategoryRepository.findAll().stream()
                 .collect(Collectors.toMap(InterviewCategory::getType, category -> category));
 
-        // 백엔드 개발자
-        JobPosition backendDev = JobPosition.builder()
-                .positionId("backend_developer")
-                .role(JobRole.BACKEND_DEVELOPER)
-                .title("백엔드 개발자")
-                .titleEn("Backend Developer")
-                .description("서버, API, 데이터베이스 설계 및 관리 등 서비스의 핵심 기능을 담당")
-                .descriptionEn(
-                        "Responsible for server-side logic, API development, database design, and managing the core functions of services")
-                .icon("FontAwesomeIcons.server")
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        // ===== 백엔드 개발 직무 =====
+        positions.add(createJobPosition(
+                "backend_developer",
+                JobRole.BACKEND_DEVELOPER,
+                "백엔드 개발자",
+                "Backend Developer",
+                "서버, API, 데이터베이스 설계 및 관리 등 서비스의 핵심 기능을 담당",
+                "Responsible for server-side logic, API development, database design, and managing the core functions of services",
+                "FontAwesomeIcons.server",
+                categoryMap.get(InterviewType.BACKEND),
+                List.of("Java", "Python", "Spring", "Spring Boot", "Django", "SQL", "MySQL", "PostgreSQL", "MongoDB",
+                        "REST API", "GraphQL", "Docker", "Kubernetes", "AWS"),
+                skillMap,
+                now));
 
-        // IT 개발 카테고리에 연결
-        backendDev.setCategory(categoryMap.get(InterviewType.TECHNICAL));
+        positions.add(createJobPosition(
+                "java_backend_developer",
+                JobRole.BACKEND_DEVELOPER,
+                "Java 백엔드 개발자",
+                "Java Backend Developer",
+                "Java 기반의 엔터프라이즈 백엔드 시스템 개발 및 유지보수",
+                "Development and maintenance of Java-based enterprise backend systems",
+                "FontAwesomeIcons.java",
+                categoryMap.get(InterviewType.BACKEND),
+                List.of("Java", "Spring", "Spring Boot", "JPA", "Hibernate", "MySQL", "Oracle", "RESTful API", "JWT",
+                        "Redis", "Kafka", "JUnit"),
+                skillMap,
+                now));
 
-        // 스킬 연결
-        List<String> backendSkillNames = List.of("Java", "Python", "Spring", "Spring Boot", "Django", "SQL", "MySQL",
-                "PostgreSQL", "MongoDB", "REST API", "GraphQL", "Docker", "Kubernetes", "AWS");
-        backendSkillNames.forEach(skillName -> {
-            Skill skill = skillMap.get(skillName);
-            if (skill != null) {
-                backendDev.getSkills().add(skill);
-            }
-        });
-        positions.add(backendDev);
+        positions.add(createJobPosition(
+                "python_backend_developer",
+                JobRole.BACKEND_DEVELOPER,
+                "Python 백엔드 개발자",
+                "Python Backend Developer",
+                "Python 기반의 웹 애플리케이션 및 API 서비스 개발",
+                "Development of Python-based web applications and API services",
+                "FontAwesomeIcons.python",
+                categoryMap.get(InterviewType.BACKEND),
+                List.of("Python", "Django", "Flask", "FastAPI", "PostgreSQL", "SQLAlchemy", "REST API", "Celery",
+                        "Redis", "AWS", "Docker", "pytest"),
+                skillMap,
+                now));
 
-        // 프론트엔드 개발자
-        JobPosition frontendDev = JobPosition.builder()
-                .positionId("frontend_developer")
-                .role(JobRole.FRONTEND_DEVELOPER)
-                .title("프론트엔드 개발자")
-                .titleEn("Frontend Developer")
-                .description("웹 사이트, 애플리케이션의 사용자 인터페이스 및 사용자 경험 개발")
-                .descriptionEn("Developing user interfaces and user experiences for websites and applications")
-                .icon("FontAwesomeIcons.display")
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        // ===== 프론트엔드 개발 직무 =====
+        positions.add(createJobPosition(
+                "frontend_developer",
+                JobRole.FRONTEND_DEVELOPER,
+                "프론트엔드 개발자",
+                "Frontend Developer",
+                "웹 사이트, 애플리케이션의 사용자 인터페이스 및 사용자 경험 개발",
+                "Developing user interfaces and user experiences for websites and applications",
+                "FontAwesomeIcons.display",
+                categoryMap.get(InterviewType.FRONTEND),
+                List.of("JavaScript", "TypeScript", "React", "Vue.js", "Angular", "HTML5", "CSS3", "Tailwind CSS",
+                        "Next.js", "Redux", "Webpack", "Jest"),
+                skillMap,
+                now));
 
-        // IT 개발 카테고리에 연결
-        frontendDev.setCategory(categoryMap.get(InterviewType.TECHNICAL));
+        positions.add(createJobPosition(
+                "react_frontend_developer",
+                JobRole.FRONTEND_DEVELOPER,
+                "React 프론트엔드 개발자",
+                "React Frontend Developer",
+                "React 기반의 웹 애플리케이션 및 컴포넌트 개발",
+                "Development of React-based web applications and components",
+                "FontAwesomeIcons.react",
+                categoryMap.get(InterviewType.FRONTEND),
+                List.of("JavaScript", "TypeScript", "React", "Redux", "Next.js", "React Query", "HTML5", "CSS3",
+                        "Styled Components", "Tailwind", "Jest", "React Testing Library"),
+                skillMap,
+                now));
 
-        // 스킬 연결
-        List<String> frontendSkillNames = List.of("JavaScript", "TypeScript", "React", "Vue.js", "Angular", "HTML5",
-                "CSS3", "Tailwind CSS", "Next.js");
-        frontendSkillNames.forEach(skillName -> {
-            Skill skill = skillMap.get(skillName);
-            if (skill != null) {
-                frontendDev.getSkills().add(skill);
-            }
-        });
-        positions.add(frontendDev);
+        // ===== 풀스택 개발 직무 =====
+        positions.add(createJobPosition(
+                "fullstack_developer",
+                JobRole.FULLSTACK_DEVELOPER,
+                "풀스택 개발자",
+                "Full Stack Developer",
+                "프론트엔드와 백엔드를 모두 개발할 수 있는 개발자",
+                "Developer capable of handling both frontend and backend development",
+                "FontAwesomeIcons.layerGroup",
+                categoryMap.get(InterviewType.FULLSTACK),
+                List.of("JavaScript", "TypeScript", "React", "Node.js", "Express.js", "MongoDB", "MySQL", "Redis",
+                        "REST API", "GraphQL", "Docker", "Git"),
+                skillMap,
+                now));
 
-        // 디자이너
-        JobPosition designer = JobPosition.builder()
-                .positionId("ui_ux_designer")
-                .role(JobRole.UI_UX_DESIGNER)
-                .title("UI/UX 디자이너")
-                .titleEn("UI/UX Designer")
-                .description("사용자 인터페이스/경험 디자인, 와이어프레임, 프로토타입 제작")
-                .descriptionEn("Designing user interfaces/experiences, creating wireframes and prototypes")
-                .icon("FontAwesomeIcons.penRuler")
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        positions.add(createJobPosition(
+                "mern_stack_developer",
+                JobRole.FULLSTACK_DEVELOPER,
+                "MERN 스택 개발자",
+                "MERN Stack Developer",
+                "MongoDB, Express, React, Node.js 기반의 웹 애플리케이션 개발",
+                "Development of web applications using MongoDB, Express, React, and Node.js",
+                "FontAwesomeIcons.reacteurope",
+                categoryMap.get(InterviewType.FULLSTACK),
+                List.of("MongoDB", "Express.js", "React", "Node.js", "JavaScript", "REST API", "Redux", "JWT", "AWS",
+                        "Docker", "Mongoose", "Git"),
+                skillMap,
+                now));
 
-        // 디자인 카테고리에 연결
-        designer.setCategory(categoryMap.get(InterviewType.DESIGN));
+        // ===== 모바일 앱 개발 직무 =====
+        positions.add(createJobPosition(
+                "android_developer",
+                JobRole.MOBILE_DEVELOPER,
+                "Android 개발자",
+                "Android Developer",
+                "Android 플랫폼용 모바일 애플리케이션 개발",
+                "Development of mobile applications for the Android platform",
+                "FontAwesomeIcons.android",
+                categoryMap.get(InterviewType.MOBILE),
+                List.of("Android", "Kotlin", "Java", "XML", "Android SDK", "Jetpack", "Room", "Retrofit", "Coroutines",
+                        "MVVM", "Firebase", "Gradle"),
+                skillMap,
+                now));
 
-        // 스킬 연결
-        List<String> designSkillNames = List.of("Figma", "Sketch", "Adobe XD", "Photoshop", "Illustrator", "UI Design",
-                "UX Design", "Wireframing", "Prototyping");
-        designSkillNames.forEach(skillName -> {
-            Skill skill = skillMap.get(skillName);
-            if (skill != null) {
-                designer.getSkills().add(skill);
-            }
-        });
-        positions.add(designer);
+        positions.add(createJobPosition(
+                "ios_developer",
+                JobRole.MOBILE_DEVELOPER,
+                "iOS 개발자",
+                "iOS Developer",
+                "iOS 플랫폼용 모바일 애플리케이션 개발",
+                "Development of mobile applications for the iOS platform",
+                "FontAwesomeIcons.apple",
+                categoryMap.get(InterviewType.MOBILE),
+                List.of("iOS", "Swift", "SwiftUI", "UIKit", "Core Data", "Combine", "XCode", "CocoaPods", "MVVM",
+                        "RESTful API", "Firebase", "TestFlight"),
+                skillMap,
+                now));
 
-        // 마케터
-        JobPosition marketer = JobPosition.builder()
-                .positionId("digital_marketer")
-                .role(JobRole.DIGITAL_MARKETER)
-                .title("디지털 마케터")
-                .titleEn("Digital Marketer")
-                .description("온라인 마케팅 전략 수립, 캠페인 기획 및 성과 분석")
-                .descriptionEn("Developing online marketing strategies, planning campaigns, and analyzing performance")
-                .icon("FontAwesomeIcons.chartLine")
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        // ===== DevOps 직무 =====
+        positions.add(createJobPosition(
+                "devops_engineer",
+                JobRole.DEVOPS_DEVELOPER,
+                "DevOps 엔지니어",
+                "DevOps Engineer",
+                "개발과 운영을 통합하여 소프트웨어 개발 및 배포 프로세스를 자동화",
+                "Automating software development and deployment processes by integrating development and operations",
+                "FontAwesomeIcons.gears",
+                categoryMap.get(InterviewType.DEVOPS),
+                List.of("Docker", "Kubernetes", "AWS", "CI/CD", "Jenkins", "GitLab CI", "Terraform", "Ansible",
+                        "Prometheus", "Grafana", "ELK Stack", "Shell Scripting"),
+                skillMap,
+                now));
 
-        // 마케팅 카테고리에 연결
-        marketer.setCategory(categoryMap.get(InterviewType.MARKETING));
+        positions.add(createJobPosition(
+                "cloud_engineer",
+                JobRole.DEVOPS_DEVELOPER,
+                "클라우드 엔지니어",
+                "Cloud Engineer",
+                "클라우드 인프라 설계, 구축 및 관리",
+                "Designing, building, and managing cloud infrastructure",
+                "FontAwesomeIcons.cloud",
+                categoryMap.get(InterviewType.DEVOPS),
+                List.of("AWS", "Azure", "GCP", "Terraform", "CloudFormation", "Kubernetes", "Docker", "Networking",
+                        "Security", "IAM", "Load Balancing", "Auto Scaling"),
+                skillMap,
+                now));
 
-        // 스킬 연결
-        List<String> marketingSkillNames = List.of("SEO", "Social Media Marketing", "Content Marketing",
-                "Google Analytics", "Growth Hacking", "Email Marketing", "Digital Advertising");
-        marketingSkillNames.forEach(skillName -> {
-            Skill skill = skillMap.get(skillName);
-            if (skill != null) {
-                marketer.getSkills().add(skill);
-            }
-        });
-        positions.add(marketer);
+        // ===== 데이터 관련 직무 =====
+        positions.add(createJobPosition(
+                "data_scientist",
+                JobRole.DATA_SCIENTIST,
+                "데이터 사이언티스트",
+                "Data Scientist",
+                "데이터를 분석하고 모델링하여 비즈니스 인사이트 도출",
+                "Analyzing and modeling data to derive business insights",
+                "FontAwesomeIcons.chartLine",
+                categoryMap.get(InterviewType.DATA_SCIENCE),
+                List.of("Python", "R", "SQL", "Statistics", "Machine Learning", "Data Visualization", "Pandas", "NumPy",
+                        "Scikit-learn", "TensorFlow", "PyTorch", "A/B Testing"),
+                skillMap,
+                now));
 
-        // 프로젝트 매니저
-        JobPosition projectManager = JobPosition.builder()
-                .positionId("project_manager")
-                .role(JobRole.PROJECT_MANAGER)
-                .title("프로젝트 관리자")
-                .titleEn("Project Manager")
-                .description("프로젝트 기획, 일정 관리, 리소스 관리 및 이해관계자 소통")
-                .descriptionEn("Planning projects, managing schedules, resources, and communicating with stakeholders")
-                .icon("FontAwesomeIcons.listCheck")
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        positions.add(createJobPosition(
+                "machine_learning_engineer",
+                JobRole.AI_ENGINEER,
+                "머신러닝 엔지니어",
+                "Machine Learning Engineer",
+                "머신러닝 모델 개발, 배포 및 모니터링",
+                "Developing, deploying, and monitoring machine learning models",
+                "FontAwesomeIcons.brain",
+                categoryMap.get(InterviewType.DATA_SCIENCE),
+                List.of("Python", "TensorFlow", "PyTorch", "Scikit-learn", "MLOps", "Feature Engineering",
+                        "Model Deployment", "Docker", "Kubernetes", "Model Monitoring", "Deep Learning", "NLP"),
+                skillMap,
+                now));
 
-        // 경영지원 카테고리에 연결
-        projectManager.setCategory(categoryMap.get(InterviewType.BUSINESS));
+        // ===== QA/테스트 직무 =====
+        positions.add(createJobPosition(
+                "qa_engineer",
+                JobRole.QA_ENGINEER,
+                "QA 엔지니어",
+                "QA Engineer",
+                "소프트웨어 품질 보증 및 테스트 자동화",
+                "Software quality assurance and test automation",
+                "FontAwesomeIcons.vial",
+                categoryMap.get(InterviewType.QA),
+                List.of("Test Planning", "Manual Testing", "Automated Testing", "Selenium", "Cypress", "JUnit",
+                        "TestNG", "JIRA", "Test Cases", "Bug Tracking", "Performance Testing", "API Testing"),
+                skillMap,
+                now));
 
-        // 스킬 연결
-        List<String> pmSkillNames = List.of("Project Management", "Agile", "Scrum", "Leadership", "Jira", "Notion");
-        pmSkillNames.forEach(skillName -> {
-            Skill skill = skillMap.get(skillName);
-            if (skill != null) {
-                projectManager.getSkills().add(skill);
-            }
-        });
-        positions.add(projectManager);
+        // ===== 보안 직무 =====
+        positions.add(createJobPosition(
+                "security_engineer",
+                JobRole.SECURITY_ENGINEER,
+                "보안 엔지니어",
+                "Security Engineer",
+                "어플리케이션 및 인프라 보안 취약점 분석 및 대응",
+                "Analyzing and responding to application and infrastructure security vulnerabilities",
+                "FontAwesomeIcons.shield",
+                categoryMap.get(InterviewType.SECURITY),
+                List.of("Network Security", "Application Security", "Penetration Testing", "Vulnerability Assessment",
+                        "OWASP", "Security Protocols", "Encryption", "Authentication", "Authorization",
+                        "Security Auditing", "Security Tools", "Incident Response"),
+                skillMap,
+                now));
+
+        // ===== 디자인 직무 =====
+        positions.add(createJobPosition(
+                "ui_ux_designer",
+                JobRole.UI_UX_DESIGNER,
+                "UI/UX 디자이너",
+                "UI/UX Designer",
+                "사용자 인터페이스/경험 디자인, 와이어프레임, 프로토타입 제작",
+                "Designing user interfaces/experiences, creating wireframes and prototypes",
+                "FontAwesomeIcons.penRuler",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("Figma", "Sketch", "Adobe XD", "Photoshop", "Illustrator", "UI Design", "UX Design",
+                        "Wireframing", "Prototyping", "User Research", "Usability Testing", "Design Systems"),
+                skillMap,
+                now));
+
+        positions.add(createJobPosition(
+                "product_designer",
+                JobRole.PRODUCT_DESIGNER,
+                "제품 디자이너",
+                "Product Designer",
+                "사용자 중심의 디지털 제품 디자인 및 UX 프로세스 관리",
+                "Designing user-centered digital products and managing UX processes",
+                "FontAwesomeIcons.objectGroup",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("UI Design", "UX Design", "Product Thinking", "Design Systems", "Interaction Design",
+                        "User Research", "Wireframing", "Prototyping", "Figma", "Design Critique", "Collaboration",
+                        "A/B Testing"),
+                skillMap,
+                now));
+
+        positions.add(createJobPosition(
+                "graphic_designer",
+                JobRole.GRAPHIC_DESIGNER,
+                "그래픽 디자이너",
+                "Graphic Designer",
+                "시각적 콘텐츠 및 브랜드 아이덴티티 디자인",
+                "Designing visual content and brand identities",
+                "FontAwesomeIcons.paintBrush",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("Photoshop", "Illustrator", "InDesign", "Typography", "Brand Design", "Logo Design",
+                        "Color Theory", "Print Design", "Digital Media", "Marketing Materials", "Composition",
+                        "Visual Communication"),
+                skillMap,
+                now));
+
+        // ===== 마케팅 직무 =====
+        positions.add(createJobPosition(
+                "digital_marketer",
+                JobRole.DIGITAL_MARKETER,
+                "디지털 마케터",
+                "Digital Marketer",
+                "온라인 마케팅 전략 수립, 캠페인 기획 및 성과 분석",
+                "Developing online marketing strategies, planning campaigns, and analyzing performance",
+                "FontAwesomeIcons.chartLine",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("SEO", "SEM", "Social Media Marketing", "Content Marketing", "Google Analytics",
+                        "Growth Hacking", "Email Marketing", "Digital Advertising", "Marketing Automation", "CRM",
+                        "Conversion Optimization", "A/B Testing"),
+                skillMap,
+                now));
+
+        positions.add(createJobPosition(
+                "content_marketer",
+                JobRole.CONTENT_MARKETER,
+                "콘텐츠 마케터",
+                "Content Marketer",
+                "브랜드 콘텐츠 전략 수립 및 양질의 콘텐츠 제작",
+                "Developing brand content strategies and creating high-quality content",
+                "FontAwesomeIcons.fileAlt",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Content Strategy", "Blog Writing", "SEO Writing", "Social Media Content", "Video Production",
+                        "Storytelling", "Brand Voice", "Content Calendar", "Content Distribution", "Analytics",
+                        "Email Newsletters", "Editing"),
+                skillMap,
+                now));
+
+        positions.add(createJobPosition(
+                "growth_marketer",
+                JobRole.GROWTH_HACKER,
+                "그로스 마케터",
+                "Growth Marketer",
+                "데이터 기반 마케팅 및 성장 전략 수립",
+                "Data-driven marketing and growth strategy development",
+                "FontAwesomeIcons.bullseye",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Growth Hacking", "Conversion Optimization", "User Acquisition", "Retention Strategies",
+                        "Analytics", "A/B Testing", "Marketing Automation", "Funnel Optimization", "Customer Journey",
+                        "Performance Marketing", "SaaS Marketing", "Viral Marketing"),
+                skillMap,
+                now));
+
+        // ===== 경영지원 직무 =====
+        positions.add(createJobPosition(
+                "project_manager",
+                JobRole.PROJECT_MANAGER,
+                "프로젝트 관리자",
+                "Project Manager",
+                "프로젝트 기획, 일정 관리, 리소스 관리 및 이해관계자 소통",
+                "Planning projects, managing schedules, resources, and communicating with stakeholders",
+                "FontAwesomeIcons.listCheck",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Project Management", "Agile", "Scrum", "Leadership", "Risk Management",
+                        "Stakeholder Management", "Project Planning", "Budgeting", "Resource Allocation", "Jira",
+                        "MS Project", "Reporting"),
+                skillMap,
+                now));
+
+        positions.add(createJobPosition(
+                "hr_manager",
+                JobRole.HR_MANAGER,
+                "인사 담당자",
+                "HR Manager",
+                "채용, 인재 개발, 성과 관리 및 HR 정책 수립",
+                "Recruiting, talent development, performance management, and establishing HR policies",
+                "FontAwesomeIcons.userTie",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Recruiting", "Talent Acquisition", "Onboarding", "Performance Management",
+                        "Compensation & Benefits", "Employee Relations", "HR Policies", "Training & Development",
+                        "HR Analytics", "HRIS", "Labor Laws", "Conflict Resolution"),
+                skillMap,
+                now));
+
+        positions.add(createJobPosition(
+                "finance_manager",
+                JobRole.FINANCE_MANAGER,
+                "재무 담당자",
+                "Finance Manager",
+                "재무 계획, 예산 관리, 재무 분석 및 보고",
+                "Financial planning, budget management, financial analysis, and reporting",
+                "FontAwesomeIcons.chartPie",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Financial Analysis", "Budgeting", "Forecasting", "Financial Reporting", "Excel", "ERP Systems",
+                        "Accounting", "Cash Flow Management", "Cost Analysis", "Investment Analysis",
+                        "Financial Modeling", "Taxation"),
+                skillMap,
+                now));
+
+        // ===== 디자인 직무 추가 =====
+        // 모션 그래픽 디자이너
+        positions.add(createJobPosition(
+                "motion_designer",
+                JobRole.GRAPHIC_DESIGNER,
+                "모션 그래픽 디자이너",
+                "Motion Graphic Designer",
+                "움직이는 그래픽 요소 및 애니메이션 디자인 제작",
+                "Creating animated graphic elements and visual effects for various media",
+                "FontAwesomeIcons.film",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("After Effects", "Premiere Pro", "Motion Graphics", "Animation", "Storyboarding",
+                        "Video Editing",
+                        "Cinema 4D", "Illustrator", "Visual Effects", "Typography", "Composition", "Color Theory"),
+                skillMap,
+                now));
+
+        // 브랜드 디자이너
+        positions.add(createJobPosition(
+                "brand_designer",
+                JobRole.BRAND_DESIGNER,
+                "브랜드 디자이너",
+                "Brand Designer",
+                "브랜드 아이덴티티 개발 및 일관된 브랜드 경험 디자인",
+                "Developing brand identities and designing consistent brand experiences",
+                "FontAwesomeIcons.certificate",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("Brand Identity", "Logo Design", "Brand Guidelines", "Visual Identity", "Typography",
+                        "Color Theory", "Brand Strategy", "Packaging Design", "Marketing Collateral",
+                        "Illustrator", "Photoshop", "Brand Storytelling"),
+                skillMap,
+                now));
+
+        // 일러스트레이터
+        positions.add(createJobPosition(
+                "illustrator",
+                JobRole.GRAPHIC_DESIGNER,
+                "일러스트레이터",
+                "Illustrator",
+                "디지털 또는 전통적인 매체를 사용한 그림 및 삽화 제작",
+                "Creating illustrations and drawings using digital or traditional media",
+                "FontAwesomeIcons.pencilRuler",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("Illustrator", "Photoshop", "Procreate", "Digital Illustration", "Character Design",
+                        "Concept Art", "Editorial Illustration", "Storyboarding", "Drawing", "Digital Painting",
+                        "Vector Art", "Composition"),
+                skillMap,
+                now));
+
+        // 3D 모델링 디자이너
+        positions.add(createJobPosition(
+                "3d_designer",
+                JobRole.GRAPHIC_DESIGNER,
+                "3D 모델링 디자이너",
+                "3D Modeling Designer",
+                "제품, 캐릭터, 환경 등의 3D 모델 디자인 및 제작",
+                "Designing and creating 3D models of products, characters, environments, etc.",
+                "FontAwesomeIcons.cube",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("Blender", "Maya", "3Ds Max", "Cinema 4D", "ZBrush", "Substance Painter", "3D Modeling",
+                        "Texturing", "Rendering", "Animation", "Rigging", "UV Mapping"),
+                skillMap,
+                now));
+
+        // UI 개발자
+        positions.add(createJobPosition(
+                "ui_developer",
+                JobRole.UI_UX_DESIGNER,
+                "UI 개발자",
+                "UI Developer",
+                "디자인 시스템을 코드로 구현하고 프론트엔드 개발자와 디자이너 간 협업 담당",
+                "Implementing design systems in code and bridging the gap between frontend developers and designers",
+                "FontAwesomeIcons.code",
+                categoryMap.get(InterviewType.DESIGN),
+                List.of("HTML5", "CSS3", "JavaScript", "Sass/SCSS", "Design Systems", "Component Libraries",
+                        "Accessibility", "Responsive Design", "Figma", "React", "Storybook", "CSS-in-JS"),
+                skillMap,
+                now));
+
+        // ===== 마케팅 직무 추가 =====
+        // 브랜드 마케터
+        positions.add(createJobPosition(
+                "brand_marketer",
+                JobRole.BRAND_MARKETER,
+                "브랜드 마케터",
+                "Brand Marketer",
+                "브랜드 전략 수립 및 브랜드 인지도와 충성도 향상 활동",
+                "Developing brand strategies and activities to enhance brand awareness and loyalty",
+                "FontAwesomeIcons.crown",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Brand Strategy", "Brand Marketing", "Brand Guidelines", "Brand Management",
+                        "Brand Storytelling",
+                        "Market Research", "Competitor Analysis", "Content Marketing", "Analytics",
+                        "Digital Marketing", "Creative Strategy", "Social Media Marketing"),
+                skillMap,
+                now));
+
+        // 소셜 미디어 마케터
+        positions.add(createJobPosition(
+                "social_media_marketer",
+                JobRole.DIGITAL_MARKETER,
+                "소셜 미디어 마케터",
+                "Social Media Marketer",
+                "소셜 미디어 플랫폼 전략 수립 및 콘텐츠 제작, 커뮤니티 관리",
+                "Developing strategies for social media platforms, creating content, and managing communities",
+                "FontAwesomeIcons.hashtag",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Social Media Marketing", "Content Marketing", "Community Management", "Analytics",
+                        "Facebook Ads", "Instagram Ads", "Twitter Ads", "LinkedIn Ads", "TikTok Ads",
+                        "Digital Advertising", "Influencer Marketing", "Content Strategy"),
+                skillMap,
+                now));
+
+        // PR/홍보 담당자
+        positions.add(createJobPosition(
+                "pr_specialist",
+                JobRole.DIGITAL_MARKETER,
+                "PR/홍보 담당자",
+                "PR Specialist",
+                "기업 이미지 관리 및 언론 관계 구축, 보도자료 작성",
+                "Managing company image, building media relations, and writing press releases",
+                "FontAwesomeIcons.newspaper",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Content Marketing", "Brand Marketing", "Content Strategy", "Brand Storytelling",
+                        "Digital Marketing", "Analytics", "SEM", "Social Media Marketing",
+                        "Brand Strategy", "SEO", "PR Strategy", "Media Management"),
+                skillMap,
+                now));
+
+        // 마케팅 분석가
+        positions.add(createJobPosition(
+                "marketing_analyst",
+                JobRole.DIGITAL_MARKETER,
+                "마케팅 분석가",
+                "Marketing Analyst",
+                "마케팅 캠페인 성과 분석 및 데이터 기반 인사이트 도출",
+                "Analyzing marketing campaign performance and deriving data-driven insights",
+                "FontAwesomeIcons.chartBar",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Data Analysis", "Google Analytics", "GA4", "A/B Testing", "Conversion Rate Optimization",
+                        "Statistical Analysis", "SQL", "Data Visualization", "Analytics",
+                        "Digital Marketing", "SEO", "Marketing ROI"),
+                skillMap,
+                now));
+
+        // 제품 마케터
+        positions.add(createJobPosition(
+                "product_marketer",
+                JobRole.DIGITAL_MARKETER,
+                "제품 마케터",
+                "Product Marketer",
+                "제품의 시장 진입 전략 수립 및 포지셔닝, 고객 니즈 분석",
+                "Developing go-to-market strategies, positioning products, and analyzing customer needs",
+                "FontAwesomeIcons.boxOpen",
+                categoryMap.get(InterviewType.MARKETING),
+                List.of("Product Marketing", "Go-to-Market Strategy", "Competitive Analysis", "Market Research",
+                        "Content Marketing", "User Research", "Messaging", "Sales Enablement",
+                        "Digital Marketing", "Content Strategy", "Analytics", "Product Management"),
+                skillMap,
+                now));
+
+        // ===== 경영지원 직무 추가 =====
+        // 사업 개발 담당자
+        positions.add(createJobPosition(
+                "business_developer",
+                JobRole.BUSINESS_DEVELOPMENT,
+                "사업 개발 담당자",
+                "Business Developer",
+                "새로운 비즈니스 기회 발굴 및 파트너십 구축, 시장 확장 전략 수립",
+                "Identifying new business opportunities, building partnerships, and developing market expansion strategies",
+                "FontAwesomeIcons.handshake",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Business Strategy", "Market Research", "Negotiation", "Contract Negotiation",
+                        "Business Model Development", "Strategic Planning", "Client Management", "Presentation Skills",
+                        "Partnership Management", "Leadership", "Problem Solving", "Financial Analysis"),
+                skillMap,
+                now));
+
+        // 전략 기획자
+        positions.add(createJobPosition(
+                "strategic_planner",
+                JobRole.BUSINESS_DEVELOPMENT,
+                "전략 기획자",
+                "Strategic Planner",
+                "기업의 중장기 성장 전략 수립 및 신규 사업 기획",
+                "Developing mid to long-term growth strategies and planning new business initiatives",
+                "FontAwesomeIcons.chessKnight",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Strategic Planning", "Business Strategy", "Market Research", "SWOT Analysis",
+                        "Financial Analysis", "Business Model Development", "Data-driven Decision Making",
+                        "Project Management", "Risk Management", "Competitive Analysis", "Market Research",
+                        "Leadership"),
+                skillMap,
+                now));
+
+        // 운영 관리자
+        positions.add(createJobPosition(
+                "operations_manager",
+                JobRole.BUSINESS_DEVELOPMENT,
+                "운영 관리자",
+                "Operations Manager",
+                "조직의 일상 업무 프로세스 관리 및 효율성 최적화",
+                "Managing day-to-day operational processes and optimizing efficiency in an organization",
+                "FontAwesomeIcons.tasks",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Operations Management", "Process Optimization", "Lean Operations", "Quality Management",
+                        "Supply Chain Management", "Vendor Management", "Project Management", "Risk Management",
+                        "Budget Management", "Team Management", "Problem Solving", "ERP Systems"),
+                skillMap,
+                now));
+
+        // 고객 성공 관리자
+        positions.add(createJobPosition(
+                "customer_success_manager",
+                JobRole.BUSINESS_DEVELOPMENT,
+                "고객 성공 관리자",
+                "Customer Success Manager",
+                "고객 관계 관리 및 고객 만족도 향상, 이탈 방지 활동",
+                "Managing customer relationships, improving satisfaction, and preventing churn",
+                "FontAwesomeIcons.userCheck",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("CRM", "Client Management", "Onboarding", "Problem Solving", "Project Management",
+                        "Team Management", "Leadership", "Performance Management", "Product Management",
+                        "Communication", "Customer Feedback", "Data Analysis"),
+                skillMap,
+                now));
+
+        // 법무 담당자
+        positions.add(createJobPosition(
+                "legal_counsel",
+                JobRole.BUSINESS_DEVELOPMENT,
+                "법무 담당자",
+                "Legal Counsel",
+                "계약 검토 및 법률 자문, 기업 법률 리스크 관리",
+                "Reviewing contracts, providing legal advice, and managing legal risks for the company",
+                "FontAwesomeIcons.balanceScale",
+                categoryMap.get(InterviewType.BUSINESS),
+                List.of("Contract Negotiation", "Negotiation", "Legal Documentation", "Corporate Law",
+                        "Risk Management", "Compliance", "Problem Solving", "Research", "Project Management",
+                        "Communication", "Leadership", "Ethics"),
+                skillMap,
+                now));
 
         jobPositionRepository.saveAll(positions);
         log.info("{}개의 직무 포지션 데이터가 초기화되었습니다.", positions.size());
+    }
+
+    // JobPosition 생성 헬퍼 메서드
+    private JobPosition createJobPosition(
+            String positionId,
+            JobRole role,
+            String title,
+            String titleEn,
+            String description,
+            String descriptionEn,
+            String icon,
+            InterviewCategory category,
+            List<String> skillNames,
+            Map<String, Skill> skillMap,
+            LocalDateTime now) {
+
+        JobPosition position = JobPosition.builder()
+                .positionId(positionId)
+                .role(role)
+                .title(title)
+                .titleEn(titleEn)
+                .description(description)
+                .descriptionEn(descriptionEn)
+                .icon(icon)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        position.setCategory(category);
+
+        // 스킬 연결
+        skillNames.forEach(skillName -> {
+            Skill skill = skillMap.get(skillName);
+            if (skill != null) {
+                position.getSkills().add(skill);
+            }
+        });
+
+        return position;
     }
 }

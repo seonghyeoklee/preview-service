@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Builder
 public class JobPositionDto {
 
+    private Long id;
     private String positionId;
     private JobRole role;
     private String title;
@@ -32,6 +33,7 @@ public class JobPositionDto {
 
     public static JobPositionDto fromEntity(JobPosition entity) {
         return JobPositionDto.builder()
+                .id(entity.getId())
                 .positionId(entity.getPositionId())
                 .role(entity.getRole())
                 .title(entity.getTitle())

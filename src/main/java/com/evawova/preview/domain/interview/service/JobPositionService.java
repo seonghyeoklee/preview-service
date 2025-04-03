@@ -1,7 +1,6 @@
 package com.evawova.preview.domain.interview.service;
 
 import com.evawova.preview.domain.interview.dto.JobPositionDto;
-import com.evawova.preview.domain.interview.entity.JobPosition;
 import com.evawova.preview.domain.interview.model.InterviewType;
 import com.evawova.preview.domain.interview.repository.JobPositionRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ public class JobPositionService {
 
     @Transactional(readOnly = true)
     public List<JobPositionDto> getAllPositions() {
-        // Use the custom query to fetch skills eagerly
         return jobPositionRepository.findAllWithSkills().stream()
                 .map(JobPositionDto::fromEntity)
                 .collect(Collectors.toList());
