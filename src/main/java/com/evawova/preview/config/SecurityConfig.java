@@ -5,6 +5,8 @@ import com.evawova.preview.security.FirebaseTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +18,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -23,11 +27,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final FirebaseTokenProvider firebaseTokenProvider;
+    private final Environment environment;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Profile("!local") // local 프로필이 아닌 경우 적용
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http
-
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,6 +70,21 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("local") // local 프로필에만 적용
+    public SecurityFilterChain localFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // 로컬 환경에서는 모든 요청 허용
+                        .anyRequest().permitAll())
+                .headers(headers -> headers.frameOptions().disable());
+
+        return http.build();
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -77,5 +97,10 @@ public class SecurityConfig {
     @Bean
     public FirebaseAuthenticationFilter firebaseAuthenticationFilter() {
         return new FirebaseAuthenticationFilter(firebaseTokenProvider);
+    }
+
+    // 현재 활성화된 프로필 확인을 위한 유틸리티 메서드
+    private boolean isLocalProfile() {
+        return Arrays.asList(environment.getActiveProfiles()).contains("local");
     }
 }

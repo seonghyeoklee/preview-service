@@ -22,48 +22,53 @@ import java.util.Set;
 public class JobPosition {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @Comment("ê³ ìœ  ì‹ë³„ì ID")
+    private Long id;
+
     @Column(nullable = false, unique = true)
-    @Comment("Á÷¹« Æ÷Áö¼Ç °íÀ¯ ½Äº°ÀÚ (Frontend ¿ë)")
+    @Comment("ì§ë¬´ í¬ì§€ì…˜ ê³ ìœ  ì‹ë³„ì (Frontend ë“±)")
     private String positionId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Comment("Á÷¹« ¿ªÇÒ Enum")
+    @Comment("ì§ë¬´ Enum")
     private JobRole role;
 
     @Column(nullable = false)
-    @Comment("Á÷¹« Á¦¸ñ (ÇÑ±Û)")
+    @Comment("ì§ë¬´ ì œëª© (í•œê¸€)")
     private String title;
 
     @Column(nullable = false)
-    @Comment("Á÷¹« Á¦¸ñ (¿µ¹®)")
+    @Comment("ì§ë¬´ ì œëª© (ì˜ë¬¸)")
     private String titleEn;
 
     @Column(columnDefinition = "TEXT")
-    @Comment("Á÷¹« ¼³¸í (ÇÑ±Û)")
+    @Comment("ì§ë¬´ ì„¤ëª… (í•œê¸€)")
     private String description;
 
     @Column(columnDefinition = "TEXT")
-    @Comment("Á÷¹« ¼³¸í (¿µ¹®)")
+    @Comment("ì§ë¬´ ì„¤ëª… (ì˜ë¬¸)")
     private String descriptionEn;
 
     @Column(nullable = false)
-    @Comment("¾ÆÀÌÄÜ ÀÌ¸§ (FontAwesome)")
+    @Comment("ì§ë¬´ ì•„ì´ì½˜ (FontAwesome)")
     private String icon;
 
     @CreatedDate
     @Column(nullable = false)
-    @Comment("»ı¼º ½Ã°£")
+    @Comment("ë“±ë¡ ì¼ì‹œ")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(nullable = false)
-    @Comment("¼öÁ¤ ½Ã°£")
+    @Comment("ìˆ˜ì • ì¼ì‹œ")
     private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "job_position_skills", joinColumns = @JoinColumn(name = "position_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    @Comment("Á÷¹« °ü·Ã ±â¼ú ½ºÅÃ")
+    @JoinTable(name = "job_position_skills", joinColumns = @JoinColumn(name = "job_position_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    @Comment("ì§ë¬´ ê´€ë ¨ ê¸°ìˆ ")
     private Set<Skill> skills = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

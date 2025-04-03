@@ -17,36 +17,37 @@ public class InterviewCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("ÀÎÅÍºä Ä«Å×°í¸® ID")
+    @Comment("ì¸í„°ë·° ì¹´í…Œê³ ë¦¬ ID")
     private Long id;
 
     @Column(nullable = false)
-    @Comment("¾ÆÀÌÄÜ ÀÌ¸§ (Frontend ½Äº°ÀÚ)")
+    @Comment("ì•„ì´ì½˜ ì´ë¦„ (Frontend ì‹ë³„ì)")
     private String icon;
 
     @Column(nullable = false)
-    @Comment("Ä«Å×°í¸® Á¦¸ñ")
+    @Comment("ì¹´í…Œê³ ë¦¬ ì œëª© (í•œê¸€)")
     private String title;
 
-    @Comment("Ä«Å×°í¸® ¼³¸í")
+    @Column
+    @Comment("ì¹´í…Œê³ ë¦¬ ì œëª© (ì˜ë¬¸)")
+    private String titleEn;
+
+    @Comment("ì¹´í…Œê³ ë¦¬ ì„¤ëª… (í•œê¸€)")
     private String description;
+
+    @Comment("ì¹´í…Œê³ ë¦¬ ì„¤ëª… (ì˜ë¬¸)")
+    private String descriptionEn;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Comment("ÀÎÅÍºä Å¸ÀÔ Enum")
+    @Comment("ì¸í„°ë·° íƒ€ì… Enum")
     private InterviewType type;
 
     @Column(nullable = false)
-    @Comment("»ı¼º ½Ã°£")
+    @Comment("ìƒì„± ì‹œê°„")
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    @Comment("¼öÁ¤ ½Ã°£")
+    @Comment("ìˆ˜ì • ì‹œê°„")
     private LocalDateTime updatedAt;
-
-    // Ensure timestamps are set during creation via builder
-    public static class InterviewCategoryBuilder {
-        private LocalDateTime createdAt = LocalDateTime.now();
-        private LocalDateTime updatedAt = LocalDateTime.now();
-    }
 }
