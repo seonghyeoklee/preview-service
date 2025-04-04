@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1355,6 +1357,12 @@ public class InitService {
     public void initializeSkills() {
         log.info("기술 스택 초기화 시작");
 
+        // 기존 스킬이 있는 경우 초기화 생략
+        if (skillRepository.count() > 0) {
+            log.info("이미 기술 스택 데이터가 존재합니다. 초기화를 건너뜁니다.");
+            return;
+        }
+
         List<Skill> skills = Arrays.asList(
                 // 개발 언어
                 Skill.builder().name("Java").nameEn("Java")
@@ -1598,8 +1606,53 @@ public class InitService {
                         .isPopular(false)
                         .build());
 
+        // 스킬 저장
         skillRepository.saveAll(skills);
-        log.info("기술 스택 초기화 완료 - {}개 저장됨", skills.size());
+        log.info("기술 스택 {}개가 초기화되었습니다.", skills.size());
+
+        // 이미지 URL 검증 (비동기로 처리)
+        verifySkillIcons();
+    }
+
+    /**
+     * 스킬 아이콘 이미지 URL 검증
+     */
+    private void verifySkillIcons() {
+        log.info("스킬 아이콘 이미지 URL 검증 시작");
+        List<Skill> skills = skillRepository.findAll();
+        List<String> invalidIconUrls = new ArrayList<>();
+
+        for (Skill skill : skills) {
+            String iconUrl = skill.getIcon();
+            if (iconUrl != null && !iconUrl.isEmpty()) {
+                try {
+                    // HEAD 요청으로 이미지 URL 검증
+                    var restTemplate = new RestTemplate();
+                    var response = restTemplate.exchange(
+                            new URI(iconUrl),
+                            org.springframework.http.HttpMethod.HEAD,
+                            null,
+                            Void.class);
+
+                    if (!response.getStatusCode().is2xxSuccessful()) {
+                        invalidIconUrls.add(iconUrl + " (" + skill.getName() + ")");
+                        log.warn("유효하지 않은 스킬 아이콘 URL: {} ({})", iconUrl, skill.getName());
+                    }
+                } catch (Exception e) {
+                    invalidIconUrls.add(iconUrl + " (" + skill.getName() + ")");
+                    log.warn("스킬 아이콘 URL 검증 오류: {} ({}) - {}", iconUrl, skill.getName(), e.getMessage());
+                }
+            }
+        }
+
+        if (invalidIconUrls.isEmpty()) {
+            log.info("모든 스킬 아이콘 이미지 URL이 유효합니다.");
+        } else {
+            log.warn("유효하지 않은 스킬 아이콘 이미지 URL: {} 개", invalidIconUrls.size());
+            for (String url : invalidIconUrls) {
+                log.warn("  - {}", url);
+            }
+        }
     }
 
     private void initializeJobPositions() {
