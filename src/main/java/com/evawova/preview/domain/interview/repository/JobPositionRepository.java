@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface JobPositionRepository extends JpaRepository<JobPosition, String> {
+public interface JobPositionRepository extends JpaRepository<JobPosition, Long> {
 
     // Eagerly fetch skills to avoid N+1 problem in the service layer when
     // converting to DTO

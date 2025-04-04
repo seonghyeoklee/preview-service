@@ -6,6 +6,8 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "interview_categories")
@@ -43,6 +45,27 @@ public class InterviewCategory {
     @Comment("인터뷰 타입 Enum")
     private InterviewType type;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    @Comment("상위 카테고리")
+    private InterviewCategory parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @Comment("하위 카테고리 목록")
+    private List<InterviewCategory> children = new ArrayList<>();
+
+    @Column(nullable = false)
+    @Comment("카테고리 계층 (1: 대분류, 2: 중분류, 3: 소분류)")
+    @Builder.Default
+    private Integer level = 1;
+
+    @ManyToMany
+    @JoinTable(name = "category_skills", joinColumns = @JoinColumn(name = "category_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    @Builder.Default
+    @Comment("카테고리 관련 스킬 목록")
+    private List<Skill> skills = new ArrayList<>();
+
     @Column(nullable = false)
     @Comment("생성 시간")
     private LocalDateTime createdAt;
@@ -50,4 +73,26 @@ public class InterviewCategory {
     @Column(nullable = false)
     @Comment("수정 시간")
     private LocalDateTime updatedAt;
+
+    /**
+     * 자식 카테고리 추가
+     */
+    public void addChild(InterviewCategory child) {
+        this.children.add(child);
+        child.setParent(this);
+    }
+
+    /**
+     * 부모 카테고리 설정
+     */
+    protected void setParent(InterviewCategory parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * 스킬 추가
+     */
+    public void addSkill(Skill skill) {
+        this.skills.add(skill);
+    }
 }

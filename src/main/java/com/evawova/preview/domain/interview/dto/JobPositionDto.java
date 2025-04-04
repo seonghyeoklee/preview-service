@@ -1,15 +1,12 @@
 package com.evawova.preview.domain.interview.dto;
 
 import com.evawova.preview.domain.interview.entity.JobPosition;
-import com.evawova.preview.domain.interview.entity.Skill;
 import com.evawova.preview.domain.interview.model.InterviewType;
 import com.evawova.preview.domain.interview.model.JobRole;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -26,7 +23,7 @@ public class JobPositionDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Ä«Å×°í¸® Á¤º¸ Ãß°¡
+    // ì¹´í…Œê³ ë¦¬ ê´€ë ¨ ì¶”ê°€
     private Long categoryId;
     private String categoryTitle;
     private InterviewType categoryType;

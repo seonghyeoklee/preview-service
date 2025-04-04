@@ -1,19 +1,18 @@
 package com.evawova.preview.domain.interview.dto;
 
 import com.evawova.preview.domain.interview.entity.InterviewCategory;
+import com.evawova.preview.domain.interview.entity.Skill;
 import com.evawova.preview.domain.interview.model.InterviewType;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 @Builder
-public class InterviewCategoryDto {
-
+public class SubCategoryWithSkillsDto {
     private Long id;
     private String icon;
     private String title;
@@ -21,17 +20,14 @@ public class InterviewCategoryDto {
     private String description;
     private String descriptionEn;
     private InterviewType type;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private Long parentId;
     private String parentTitle;
-    private Integer level;
+    private List<SkillDto> skills;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    @Builder.Default
-    private List<InterviewCategoryDto> children = new ArrayList<>();
-
-    public static InterviewCategoryDto from(InterviewCategory entity) {
-        return InterviewCategoryDto.builder()
+    public static SubCategoryWithSkillsDto from(InterviewCategory entity) {
+        return SubCategoryWithSkillsDto.builder()
                 .id(entity.getId())
                 .icon(entity.getIcon())
                 .title(entity.getTitle())
@@ -41,25 +37,27 @@ public class InterviewCategoryDto {
                 .type(entity.getType())
                 .parentId(entity.getParent() != null ? entity.getParent().getId() : null)
                 .parentTitle(entity.getParent() != null ? entity.getParent().getTitle() : null)
-                .level(entity.getLevel())
+                .skills(entity.getSkills() != null ? entity.getSkills().stream()
+                        .map(SkillDto::from)
+                        .collect(Collectors.toList()) : List.of())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
-    /**
-     * 계층형 구조로 변환 (재귀적으로 자식 카테고리 포함)
-     */
-    public static InterviewCategoryDto fromWithChildren(InterviewCategory entity) {
-        InterviewCategoryDto dto = from(entity);
+    @Getter
+    @Builder
+    public static class SkillDto {
+        private Long id;
+        private String name;
+        private String nameEn;
 
-        if (entity.getChildren() != null && !entity.getChildren().isEmpty()) {
-            dto.children.addAll(
-                    entity.getChildren().stream()
-                            .map(InterviewCategoryDto::fromWithChildren)
-                            .collect(Collectors.toList()));
+        public static SkillDto from(Skill skill) {
+            return SkillDto.builder()
+                    .id(skill.getId())
+                    .name(skill.getName())
+                    .nameEn(skill.getNameEn())
+                    .build();
         }
-
-        return dto;
     }
 }
