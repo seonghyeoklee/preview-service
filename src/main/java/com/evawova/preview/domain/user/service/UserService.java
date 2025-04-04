@@ -8,6 +8,8 @@ import com.evawova.preview.domain.user.entity.PlanType;
 import com.evawova.preview.domain.user.entity.User;
 import com.evawova.preview.domain.user.repository.PlanRepository;
 import com.evawova.preview.domain.user.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -49,7 +51,7 @@ public class UserService {
 
     public UserDto getUserByUid(String uid) {
         User user = userRepository.findByUid(uid)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with uid: " + uid));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with uid: " + uid));
         return UserDto.fromEntity(user);
     }
 

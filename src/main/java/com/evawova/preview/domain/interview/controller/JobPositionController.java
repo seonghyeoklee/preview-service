@@ -21,7 +21,7 @@ public class JobPositionController {
     private final JobPositionService jobPositionService;
 
     @GetMapping
-    @Operation(summary = "직무 포지션 조회", description = "모든 직무 포지션 또는 카테고리별 직무 포지션 정보를 조회합니다.")
+    @Operation(summary = "직무 포지션 조회", description = "모든 직무 포지션 또는 직군별(DEVELOPMENT, DESIGN, MARKETING, BUSINESS) 직무 포지션 정보를 조회합니다.")
     public ResponseEntity<ApiResponse<List<JobPositionDto>>> getPositions(
             @RequestParam(name = "categoryId", required = false) String categoryTypeStr) {
 
@@ -52,7 +52,7 @@ public class JobPositionController {
     }
 
     @GetMapping("/type/{categoryType}")
-    @Operation(summary = "직군별 직무 포지션 조회", description = "특정 직군(TECHNICAL, DESIGN, MARKETING, BUSINESS 등)에 속한 직무 포지션 정보를 조회합니다.")
+    @Operation(summary = "직군별 직무 포지션 조회", description = "특정 직군(DEVELOPMENT, DESIGN, MARKETING, BUSINESS)에 속한 직무 포지션 정보를 조회합니다.")
     public ResponseEntity<ApiResponse<List<JobPositionDto>>> getPositionsByCategoryType(
             @PathVariable("categoryType") InterviewType categoryType) {
         List<JobPositionDto> positions = jobPositionService.getPositionsByCategoryType(categoryType);

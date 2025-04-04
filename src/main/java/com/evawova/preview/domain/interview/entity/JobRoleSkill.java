@@ -7,39 +7,35 @@ import org.hibernate.annotations.Comment;
 
 import java.time.LocalDateTime;
 
+/**
+ * 직무별 기술 스택 매핑
+ */
 @Entity
-@Table(name = "skills")
+@Table(name = "job_role_skills")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Skill {
+public class JobRoleSkill {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("기술 스택 ID")
+    @Comment("직무별 기술 ID")
     private Long id;
 
-    @Column(nullable = false)
-    @Comment("기술 스택 한글명")
-    private String name;
-
-    @Column(nullable = false)
-    @Comment("기술 스택 영문명")
-    private String nameEn;
-
-    @Column
-    @Comment("기술 스택 아이콘")
-    private String icon;
-
     @Enumerated(EnumType.STRING)
-    @Column
-    @Comment("주요 관련 직무")
-    private JobRole primaryJobRole;
+    @Column(nullable = false)
+    @Comment("직무 역할")
+    private JobRole jobRole;
 
-    @Column
-    @Comment("인기 기술 여부")
-    private Boolean isPopular;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "skill_id", nullable = false)
+    @Comment("기술 스택")
+    private Skill skill;
+
+    @Column(nullable = false)
+    @Comment("중요도 (1: 필수, 2: 권장, 3: 선택)")
+    private Integer importance;
 
     @Column(nullable = false)
     @Comment("생성 시간")
@@ -50,9 +46,8 @@ public class Skill {
     private LocalDateTime updatedAt;
 
     // Ensure timestamps are set during creation via builder
-    public static class SkillBuilder {
+    public static class JobRoleSkillBuilder {
         private LocalDateTime createdAt = LocalDateTime.now();
         private LocalDateTime updatedAt = LocalDateTime.now();
-        private Boolean isPopular = false; // 기본값 설정
     }
 }

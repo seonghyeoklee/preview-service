@@ -32,6 +32,12 @@ server:
       force: true
       enabled: true
 
+# OpenAI API 설정
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    model: ${OPENAI_MODEL:gpt-3.5-turbo}
+
 ---
 spring:
   config:
@@ -45,13 +51,14 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
 logging:
   level:
     com.evawova.preview: debug
     com.evawova.preview.common.filter: debug
     com.google.firebase: debug
+    com.evawova.preview.domain.ai: debug
 
 ---
 spring:
