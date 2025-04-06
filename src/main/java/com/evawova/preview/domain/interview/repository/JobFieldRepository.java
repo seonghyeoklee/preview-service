@@ -1,10 +1,10 @@
 package com.evawova.preview.domain.interview.repository;
 
-import com.evawova.preview.domain.interview.entity.Skill;
+import com.evawova.preview.domain.interview.entity.JobField;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SkillRepository extends JpaRepository<Skill, Long> {
+public interface JobFieldRepository extends JpaRepository<JobField, Long> {
 
 }

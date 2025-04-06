@@ -1,48 +1,49 @@
 package com.evawova.preview.domain.interview.entity;
 
-import com.evawova.preview.domain.interview.model.JobRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+/**
+ * 직무 엔티티 - 백엔드 개발자, 프론트엔드 개발자 등
+ */
 @Entity
 @Table(name = "job_positions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@ToString(exclude = { "skills", "category" })
+@Builder
 public class JobPosition {
+
+    // 직무 코드 상수
+    public static final String BACKEND_DEVELOPER = "backend_developer";
+    public static final String FRONTEND_DEVELOPER = "frontend_developer";
+    public static final String FULLSTACK_DEVELOPER = "fullstack_developer";
+    public static final String MOBILE_DEVELOPER = "mobile_developer";
+    public static final String UI_UX_DESIGNER = "ui_ux_designer";
+    public static final String PRODUCT_DESIGNER = "product_designer";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @Comment("고유 식별자 ID")
+    @Comment("직무 고유 ID")
     private Long id;
 
     @Column(nullable = false, unique = true)
-    @Comment("직무 포지션 고유 식별자 (Frontend 등)")
-    private String positionId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Comment("직무 Enum")
-    private JobRole role;
+    @Comment("직무 코드 (예: backend_developer)")
+    private String code;
 
     @Column(nullable = false)
-    @Comment("직무 제목 (한글)")
-    private String title;
+    @Comment("직무 이름 (한글)")
+    private String name;
 
-    @Column(nullable = false)
-    @Comment("직무 제목 (영문)")
-    private String titleEn;
+    @Column
+    @Comment("직무 이름 (영문)")
+    private String nameEn;
 
     @Column(columnDefinition = "TEXT")
     @Comment("직무 설명 (한글)")
@@ -53,43 +54,75 @@ public class JobPosition {
     private String descriptionEn;
 
     @Column(nullable = false)
-    @Comment("직무 아이콘 (FontAwesome)")
+    @Comment("직무 아이콘")
     private String icon;
 
-    @CreatedDate
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_field_id")
+    @Comment("소속 직군")
+    private JobField jobField;
+
+    @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @Comment("직무 관련 스킬 연결")
+    private List<JobPositionSkill> jobPositionSkills = new ArrayList<>();
+
     @Column(nullable = false)
-    @Comment("등록 일시")
+    @Comment("활성 여부")
+    @Builder.Default
+    private Boolean active = true;
+
+    @Column(nullable = false)
+    @Comment("정렬 순서")
+    @Builder.Default
+    private Integer sortOrder = 0;
+
+    @Column(nullable = false)
+    @Comment("생성 시간")
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     @Column(nullable = false)
-    @Comment("수정 일시")
+    @Comment("수정 시간")
     private LocalDateTime updatedAt;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "job_position_skills", joinColumns = @JoinColumn(name = "job_position_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    @Comment("직무 관련 기술")
-    private Set<Skill> skills = new HashSet<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private InterviewCategory category;
-
-    @Builder
-    public JobPosition(String positionId, JobRole role, String title, String titleEn, String description,
-            String descriptionEn, String icon, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.positionId = positionId;
-        this.role = role;
-        this.title = title;
-        this.titleEn = titleEn;
-        this.description = description;
-        this.descriptionEn = descriptionEn;
-        this.icon = icon;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-    public void setCategory(InterviewCategory category) {
-        this.category = category;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 직군 설정
+     */
+    public void setJobField(JobField jobField) {
+        this.jobField = jobField;
+    }
+
+    /**
+     * 스킬 추가
+     */
+    public void addSkill(Skill skill) {
+        JobPositionSkill jobPositionSkill = new JobPositionSkill(this, skill);
+        this.jobPositionSkills.add(jobPositionSkill);
+    }
+
+    /**
+     * 스킬 추가 (중요도 설정)
+     */
+    public void addSkill(Skill skill, Integer importance) {
+        JobPositionSkill jobPositionSkill = new JobPositionSkill(this, skill, importance);
+        this.jobPositionSkills.add(jobPositionSkill);
+    }
+
+    /**
+     * 스킬 제거
+     */
+    public void removeSkill(Skill skill) {
+        jobPositionSkills.removeIf(link -> link.getSkill().equals(skill));
     }
 }
