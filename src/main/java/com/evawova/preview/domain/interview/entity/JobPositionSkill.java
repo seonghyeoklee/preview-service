@@ -3,6 +3,8 @@ package com.evawova.preview.domain.interview.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
 @Table(name = "job_position_skills")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class JobPositionSkill {
 
     @Id
@@ -21,12 +25,12 @@ public class JobPositionSkill {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_position_id")
+    @JoinColumn(name = "job_position_id", nullable = false)
     @Comment("직무")
     private JobPosition jobPosition;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "skill_id")
+    @JoinColumn(name = "skill_id", nullable = false)
     @Comment("스킬")
     private Skill skill;
 
@@ -34,10 +38,12 @@ public class JobPositionSkill {
     @Comment("중요도 (0: 낮음, 10: 높음)")
     private Integer importance = 5;
 
-    @Column(nullable = false)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     @Comment("생성 시간")
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     @Comment("수정 시간")
     private LocalDateTime updatedAt;
