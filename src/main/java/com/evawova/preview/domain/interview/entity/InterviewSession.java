@@ -1,5 +1,6 @@
 package com.evawova.preview.domain.interview.entity;
 
+import com.evawova.preview.domain.subscription.entity.SubscriptionUsage;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
@@ -26,6 +27,11 @@ public class InterviewSession {
     @JoinColumn(name = "settings_id")
     @Comment("인터뷰 설정")
     private InterviewSettings settings;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_usage_id")
+    @Comment("구독 사용량")
+    private SubscriptionUsage subscriptionUsage;
 
     @Column(nullable = false)
     @Comment("세션 상태")
@@ -71,6 +77,10 @@ public class InterviewSession {
     public void setSettings(InterviewSettings settings) {
         this.settings = settings;
         settings.setSession(this);
+    }
+
+    public void setSubscriptionUsage(SubscriptionUsage subscriptionUsage) {
+        this.subscriptionUsage = subscriptionUsage;
     }
 
     public void addMessage(InterviewMessage message) {
