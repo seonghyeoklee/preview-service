@@ -46,3 +46,6 @@ out/
 firebase-service-account.json
 
 /logs/*
+
+# Kubernetes configuration files
+/kubernetes/
