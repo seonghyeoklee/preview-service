@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,37 +40,47 @@ public class Subscription extends AggregateRoot<Long> {
     @Comment("구독 플랜")
     private Plan plan;
 
-    @Column(nullable = false)
-    @Comment("구독 시작일")
+    @Column(nullable = false, name = "start_date")
+    @Comment("구독 시작 날짜")
     private LocalDateTime startDate;
 
-    @Column(nullable = false)
-    @Comment("구독 종료일")
+    @Column(nullable = false, name = "end_date")
+    @Comment("구독 종료 날짜")
     private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Comment("구독 상태")
+    @Column(nullable = false, name = "status")
+    @Comment("구독 상태 (ACTIVE, CANCELLED, EXPIRED)")
     private SubscriptionStatus status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "payment_amount")
     @Comment("구독 결제 금액")
     private BigDecimal paymentAmount;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "subscription_cycle")
     @Comment("구독 결제 주기")
-    private SubscriptionCycle cycle;
+    private SubscriptionCycle subscriptionCycle;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_active")
     @Comment("구독 활성화 여부")
-    private boolean active;
+    private Boolean isActive;
 
-    @Column(nullable = false)
-    @Comment("생성일시")
+    @Column(name = "stripe_subscription_id", unique = true)
+    @Comment("Stripe 구독 ID")
+    private String stripeSubscriptionId;
+
+    @Column(name = "renewal_date")
+    @Comment("다음 갱신 날짜")
+    private LocalDateTime renewalDate;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false, name = "created_at")
+    @Comment("생성 시간")
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    @Comment("수정일시")
+    @LastModifiedDate
+    @Column(nullable = false, name = "updated_at")
+    @Comment("수정 시간")
     private LocalDateTime updatedAt;
 
     public enum SubscriptionStatus {
@@ -89,7 +101,7 @@ public class Subscription extends AggregateRoot<Long> {
             LocalDateTime startDate,
             LocalDateTime endDate,
             BigDecimal paymentAmount,
-            SubscriptionCycle cycle) {
+            SubscriptionCycle subscriptionCycle) {
 
         Subscription subscription = Subscription.builder()
                 .user(user)
@@ -98,8 +110,8 @@ public class Subscription extends AggregateRoot<Long> {
                 .endDate(endDate)
                 .status(SubscriptionStatus.ACTIVE)
                 .paymentAmount(paymentAmount)
-                .cycle(cycle)
-                .active(true)
+                .subscriptionCycle(subscriptionCycle)
+                .isActive(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -112,7 +124,7 @@ public class Subscription extends AggregateRoot<Long> {
 
     public void cancel() {
         this.status = SubscriptionStatus.CANCELLED;
-        this.active = false;
+        this.isActive = false;
         this.updatedAt = LocalDateTime.now();
 
         // 도메인 이벤트 등록
@@ -121,7 +133,7 @@ public class Subscription extends AggregateRoot<Long> {
 
     public void expire() {
         this.status = SubscriptionStatus.EXPIRED;
-        this.active = false;
+        this.isActive = false;
         this.updatedAt = LocalDateTime.now();
 
         // 도메인 이벤트 등록
@@ -131,14 +143,21 @@ public class Subscription extends AggregateRoot<Long> {
     public void renew(LocalDateTime newEndDate) {
         this.endDate = newEndDate;
         this.status = SubscriptionStatus.ACTIVE;
-        this.active = true;
+        this.isActive = true;
         this.updatedAt = LocalDateTime.now();
 
         // 도메인 이벤트 등록
         this.registerEvent(new SubscriptionRenewedEvent(this));
     }
 
+    public void updateRenewal(LocalDateTime newEndDate, LocalDateTime newRenewalDate) {
+        this.endDate = newEndDate;
+        this.renewalDate = newRenewalDate;
+        this.status = SubscriptionStatus.ACTIVE; // Assuming renewal implies active
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public boolean isActive() {
-        return this.active && this.status == SubscriptionStatus.ACTIVE;
+        return this.isActive && this.status == SubscriptionStatus.ACTIVE;
     }
 }

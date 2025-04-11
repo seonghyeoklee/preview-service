@@ -29,54 +29,66 @@ public class UserLoginLog {
     @Comment("로그인한 사용자")
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "ip_address")
     @Comment("로그인 IP 주소")
     private String ipAddress;
 
-    @Column(nullable = false)
+    @Column(name = "user_agent")
     @Comment("사용자 에이전트 문자열")
     private String userAgent;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "device_type")
     @Comment("디바이스 타입 (DESKTOP, MOBILE, TABLET)")
     private String deviceType;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "browser_info")
     @Comment("브라우저 정보")
     private String browserInfo;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "os_info")
     @Comment("운영체제 정보")
     private String osInfo;
 
-    @Column(nullable = false)
-    @Comment("로그인 성공 여부")
-    private boolean successful;
-
-    @Comment("로그인 실패 사유")
-    private String failReason;
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    @Comment("로그인 시도 시간")
+    @Column(nullable = false, name = "login_at")
+    @Comment("로그인 시간")
     private LocalDateTime loginAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, name = "login_status")
+    @Comment("로그인 상태 (SUCCESS, FAILURE)")
+    private LoginStatus loginStatus;
+
+    @Column(name = "failure_reason")
+    @Comment("로그인 실패 사유")
+    private String failureReason;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false, name = "created_at")
+    @Comment("기록 생성 시간")
+    private LocalDateTime createdAt;
+
+    public enum LoginStatus {
+        SUCCESS, FAILURE
+    }
+
     @Builder
-    public UserLoginLog(User user, String ipAddress, String userAgent, 
-                       String deviceType, String browserInfo, String osInfo, 
-                       boolean successful, String failReason) {
+    public UserLoginLog(User user, String ipAddress, String userAgent,
+            String deviceType, String browserInfo, String osInfo,
+            boolean successful, String failReason) {
         this.user = user;
         this.ipAddress = ipAddress;
         this.userAgent = userAgent;
         this.deviceType = deviceType;
         this.browserInfo = browserInfo;
         this.osInfo = osInfo;
-        this.successful = successful;
-        this.failReason = failReason;
         this.loginAt = LocalDateTime.now();
+        this.loginStatus = successful ? LoginStatus.SUCCESS : LoginStatus.FAILURE;
+        this.failureReason = failReason;
+        this.createdAt = LocalDateTime.now();
     }
 
-    public static UserLoginLog createLog(User user, String ipAddress, String userAgent, String deviceType, String browserInfo, String osInfo) {
+    public static UserLoginLog createLog(User user, String ipAddress, String userAgent, String deviceType,
+            String browserInfo, String osInfo) {
         return UserLoginLog.builder()
                 .user(user)
                 .ipAddress(ipAddress)
@@ -89,7 +101,8 @@ public class UserLoginLog {
                 .build();
     }
 
-    public static UserLoginLog createFailedLog(User user, String ipAddress, String userAgent, String deviceType, String browserInfo, String osInfo, String failReason) {
+    public static UserLoginLog createFailedLog(User user, String ipAddress, String userAgent, String deviceType,
+            String browserInfo, String osInfo, String failReason) {
         return UserLoginLog.builder()
                 .user(user)
                 .ipAddress(ipAddress)
@@ -102,4 +115,4 @@ public class UserLoginLog {
                 .loginAt(LocalDateTime.now())
                 .build();
     }
-} 
+}

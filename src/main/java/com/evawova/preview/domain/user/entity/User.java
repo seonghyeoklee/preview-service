@@ -1,8 +1,6 @@
 package com.evawova.preview.domain.user.entity;
 
 import com.evawova.preview.domain.common.model.AggregateRoot;
-import com.evawova.preview.domain.user.event.UserCreatedEvent;
-import com.evawova.preview.domain.user.event.UserPlanChangedEvent;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -30,18 +28,19 @@ public class User extends AggregateRoot<Long> {
     @Comment("사용자 고유 식별자")
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, name = "uid")
     @Comment("소셜 로그인 제공자의 사용자 고유 식별자")
     private String uid;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, name = "email")
     @Comment("사용자 이메일")
     private String email;
 
+    @Column(name = "password")
     @Comment("사용자 비밀번호 (소셜 로그인의 경우 임시 비밀번호)")
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "display_name")
     @Comment("사용자 표시 이름")
     private String displayName;
 
@@ -56,36 +55,39 @@ public class User extends AggregateRoot<Long> {
     private List<UserLoginLog> loginLogs = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "provider")
     @Comment("소셜 로그인 제공자 (GOOGLE, APPLE)")
     private Provider provider;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "role")
     @Comment("사용자 역할 (USER, ADMIN, ROLE_FREE, ROLE_STANDARD, ROLE_PRO)")
     @Builder.Default
     private Role role = Role.USER_FREE;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_active")
     @Comment("계정 활성화 상태")
-    private boolean active = true;
+    private Boolean isActive;
 
+    @Column(name = "photo_url")
     @Comment("프로필 사진 URL")
     private String photoUrl;
 
+    @Column(name = "is_email_verified")
     @Comment("이메일 인증 여부")
-    private boolean isEmailVerified;
+    private Boolean isEmailVerified;
 
+    @Column(name = "last_login_at")
     @Comment("마지막 로그인 시간")
     private LocalDateTime lastLoginAt;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "created_at")
     @Comment("계정 생성 시간")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(nullable = false, name = "updated_at")
     @Comment("계정 정보 수정 시간")
     private LocalDateTime updatedAt;
 
@@ -99,34 +101,30 @@ public class User extends AggregateRoot<Long> {
 
     // 생성 메서드
     public static User createUser(String email, String password, String name) {
-        User user = User.builder()
+        return User.builder()
                 .email(email)
                 .password(password)
                 .displayName(name)
                 .role(Role.USER_FREE)
-                .active(true)
+                .isActive(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-
-        return user;
     }
 
     // 소셜 로그인용 생성자
     public static User createSocialUser(String uid, String email, String name, Provider provider) {
-        User user = User.builder()
+        return User.builder()
                 .uid(uid)
                 .email(email)
                 .displayName(name)
                 .provider(provider)
                 .role(Role.USER_FREE)
-                .active(true)
+                .isActive(true)
                 .password("SOCIAL_USER_" + System.currentTimeMillis())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-
-        return user;
     }
 
     // 소셜 로그인 정보 업데이트
@@ -146,7 +144,7 @@ public class User extends AggregateRoot<Long> {
     }
 
     public void withdraw() {
-        this.active = false;
+        this.isActive = false;
         this.email = "withdrawn_" + System.currentTimeMillis() + "@withdrawn.com";
         this.displayName = "탈퇴한 사용자";
         this.password = null;

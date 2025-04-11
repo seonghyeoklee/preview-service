@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,36 +32,38 @@ public class Plan extends AggregateRoot<Long> {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "plan_type")
     @Comment("플랜 타입")
-    private PlanType type;
+    private PlanType planType;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "monthly_price")
     @Comment("월간 가격")
     private BigDecimal monthlyPrice;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "annual_price")
     @Comment("연간 가격")
     private BigDecimal annualPrice;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "monthly_token_limit")
     @Comment("월간 토큰 사용량 제한")
     private Integer monthlyTokenLimit;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_active")
     @Comment("활성화 여부")
-    private boolean active;
+    private Boolean isActive;
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     @Builder.Default
     @Comment("플랜의 구독 목록")
     private List<Subscription> subscriptions = new ArrayList<>();
 
-    @Column(nullable = false)
+    @CreatedDate
+    @Column(nullable = false, name = "created_at")
     @Comment("생성일시")
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @LastModifiedDate
+    @Column(nullable = false, name = "updated_at")
     @Comment("수정일시")
     private LocalDateTime updatedAt;
 
@@ -75,59 +79,59 @@ public class Plan extends AggregateRoot<Long> {
     }
 
     public static Plan createPlan(
-            PlanType type,
+            PlanType planType,
             BigDecimal monthlyPrice,
             BigDecimal annualPrice,
             Integer monthlyTokenLimit,
-            boolean active) {
-        validatePlan(type, monthlyPrice, annualPrice, monthlyTokenLimit);
+            Boolean isActive) {
+        validatePlan(planType, monthlyPrice, annualPrice, monthlyTokenLimit);
 
         Plan plan = Plan.builder()
-                .type(type)
+                .planType(planType)
                 .monthlyPrice(monthlyPrice)
                 .annualPrice(annualPrice)
                 .monthlyTokenLimit(monthlyTokenLimit)
-                .active(active)
+                .isActive(isActive)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
         // 도메인 이벤트 등록
-        plan.registerEvent(new PlanCreatedEvent(plan.id, plan.type));
+        plan.registerEvent(new PlanCreatedEvent(plan.id, plan.planType));
 
         return plan;
     }
 
     public void updatePlan(
-            PlanType type,
+            PlanType planType,
             BigDecimal monthlyPrice,
             BigDecimal annualPrice,
             Integer monthlyTokenLimit,
-            boolean active) {
-        validatePlan(type, monthlyPrice, annualPrice, monthlyTokenLimit);
+            Boolean isActive) {
+        validatePlan(planType, monthlyPrice, annualPrice, monthlyTokenLimit);
 
-        this.type = type;
+        this.planType = planType;
         this.monthlyPrice = monthlyPrice;
         this.annualPrice = annualPrice;
         this.monthlyTokenLimit = monthlyTokenLimit;
-        this.active = active;
+        this.isActive = isActive;
     }
 
     public void deactivate() {
-        this.active = false;
+        this.isActive = false;
     }
 
     private static void validatePlan(
-            PlanType type,
+            PlanType planType,
             BigDecimal monthlyPrice,
             BigDecimal annualPrice,
             Integer monthlyTokenLimit) {
-        if (type == PlanType.FREE
+        if (planType == PlanType.FREE
                 && (monthlyPrice.compareTo(BigDecimal.ZERO) > 0 || annualPrice.compareTo(BigDecimal.ZERO) > 0)) {
             throw new IllegalArgumentException("무료 플랜의 가격은 0이어야 합니다");
         }
 
-        if (type == PlanType.PRO && monthlyTokenLimit < 100000) {
+        if (planType == PlanType.PRO && monthlyTokenLimit < 100000) {
             throw new IllegalArgumentException("프로 플랜은 최소 100,000개의 월간 토큰을 가질 수 있어야 합니다");
         }
     }
