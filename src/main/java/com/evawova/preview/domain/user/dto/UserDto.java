@@ -1,5 +1,7 @@
 package com.evawova.preview.domain.user.dto;
 
+import com.evawova.preview.domain.user.entity.Plan;
+import com.evawova.preview.domain.user.entity.Subscription;
 import com.evawova.preview.domain.user.entity.User;
 
 import lombok.AllArgsConstructor;
@@ -17,7 +19,7 @@ public class UserDto {
     private String uid;
     private String email;
     private String displayName;
-    private PlanDto plan;
+    private PlanDto activePlan;
     private User.Provider provider;
     private User.Role role;
     private boolean active;
@@ -26,18 +28,24 @@ public class UserDto {
     private LocalDateTime lastLoginAt;
 
     public static UserDto fromEntity(User user) {
+        // Get active subscription and its plan
+        Subscription activeSubscription = user.getActiveSubscription();
+        PlanDto activePlanDto = (activeSubscription != null && activeSubscription.getPlan() != null)
+                ? PlanDto.fromEntity(activeSubscription.getPlan())
+                : null; // Or provide a default FREE plan DTO if needed
+
         return UserDto.builder()
-            .id(user.getId())
-            .uid(user.getUid())
-            .email(user.getEmail())
-            .displayName(user.getDisplayName())
-            .plan(PlanDto.fromEntity(user.getPlan()))
-            .provider(user.getProvider())
-            .role(user.getRole())
-            .active(user.isActive())
-            .photoUrl(user.getPhotoUrl())
-            .isEmailVerified(user.isEmailVerified())
-            .lastLoginAt(user.getLastLoginAt())
-            .build();
+                .id(user.getId())
+                .uid(user.getUid())
+                .email(user.getEmail())
+                .displayName(user.getDisplayName())
+                .activePlan(activePlanDto)
+                .provider(user.getProvider())
+                .role(user.getRole())
+                .active(user.isActive())
+                .photoUrl(user.getPhotoUrl())
+                .isEmailVerified(user.isEmailVerified())
+                .lastLoginAt(user.getLastLoginAt())
+                .build();
     }
-} 
+}

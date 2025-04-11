@@ -13,6 +13,8 @@ import org.hibernate.annotations.Comment;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "plans")
@@ -47,6 +49,11 @@ public class Plan extends AggregateRoot<Long> {
     @Column(nullable = false)
     @Comment("활성화 여부")
     private boolean active;
+
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
+    @Builder.Default
+    @Comment("플랜의 구독 목록")
+    private List<Subscription> subscriptions = new ArrayList<>();
 
     @Column(nullable = false)
     @Comment("생성일시")
@@ -123,5 +130,9 @@ public class Plan extends AggregateRoot<Long> {
         if (type == PlanType.PRO && monthlyTokenLimit < 100000) {
             throw new IllegalArgumentException("프로 플랜은 최소 100,000개의 월간 토큰을 가질 수 있어야 합니다");
         }
+    }
+
+    public BigDecimal getPriceForCycle(Subscription.SubscriptionCycle cycle) {
+        return cycle == Subscription.SubscriptionCycle.MONTHLY ? monthlyPrice : annualPrice;
     }
 }

@@ -1,7 +1,6 @@
 package com.evawova.preview.domain.interview.entity;
 
 import com.evawova.preview.domain.interview.entity.enums.InterviewSessionStatus;
-import com.evawova.preview.domain.subscription.entity.SubscriptionUsage;
 import com.evawova.preview.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,10 +51,6 @@ public class InterviewSession {
     @JoinColumn(name = "settings_id", nullable = false)
     private InterviewSettings settings;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_usage_id", nullable = false)
-    private SubscriptionUsage subscriptionUsage;
-
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<InterviewMessage> messages = new ArrayList<>();
@@ -73,10 +68,6 @@ public class InterviewSession {
     public void setSettings(InterviewSettings settings) {
         this.settings = settings;
         settings.setSession(this);
-    }
-
-    public void setSubscriptionUsage(SubscriptionUsage subscriptionUsage) {
-        this.subscriptionUsage = subscriptionUsage;
     }
 
     public void addMessage(InterviewMessage message) {

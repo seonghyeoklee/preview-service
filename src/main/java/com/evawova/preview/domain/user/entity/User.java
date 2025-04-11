@@ -45,10 +45,10 @@ public class User extends AggregateRoot<Long> {
     @Comment("사용자 표시 이름")
     private String displayName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "plan_id", nullable = false)
-    @Comment("사용자의 구독 플랜")
-    private Plan plan;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    @Comment("사용자의 구독 목록")
+    private List<Subscription> subscriptions = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
@@ -98,50 +98,34 @@ public class User extends AggregateRoot<Long> {
     }
 
     // 생성 메서드
-    public static User createUser(String email, String password, String name, Plan plan) {
+    public static User createUser(String email, String password, String name) {
         User user = User.builder()
                 .email(email)
                 .password(password)
                 .displayName(name)
-                .plan(plan)
                 .role(Role.USER_FREE)
                 .active(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        
-        // 도메인 이벤트 등록
-        user.registerEvent(new UserCreatedEvent(user.id, user.email, user.displayName, plan.getType()));
-        
+
         return user;
     }
 
-    // 플랜 변경 메서드
-    public void changePlan(Plan newPlan) {
-        Plan oldPlan = this.plan;
-        this.plan = newPlan;
-        this.updatedAt = LocalDateTime.now();
-        
-        // 도메인 이벤트 등록
-        this.registerEvent(new UserPlanChangedEvent(this.id, this.email, oldPlan.getType(), newPlan.getType()));
-    }
-
     // 소셜 로그인용 생성자
-    public static User createSocialUser(String uid, String email, String name, Provider provider, Plan plan) {
+    public static User createSocialUser(String uid, String email, String name, Provider provider) {
         User user = User.builder()
                 .uid(uid)
                 .email(email)
                 .displayName(name)
                 .provider(provider)
-                .plan(plan)
                 .role(Role.USER_FREE)
                 .active(true)
                 .password("SOCIAL_USER_" + System.currentTimeMillis())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        
-        user.registerEvent(new UserCreatedEvent(user.getId(), user.getEmail(), user.getDisplayName(), user.getPlan().getType()));
+
         return user;
     }
 
@@ -152,7 +136,8 @@ public class User extends AggregateRoot<Long> {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateAdditionalInfo(String displayName, String photoUrl, boolean isEmailVerified, LocalDateTime lastLoginAt) {
+    public void updateAdditionalInfo(String displayName, String photoUrl, boolean isEmailVerified,
+            LocalDateTime lastLoginAt) {
         this.displayName = displayName;
         this.photoUrl = photoUrl;
         this.isEmailVerified = isEmailVerified;
@@ -171,16 +156,24 @@ public class User extends AggregateRoot<Long> {
         this.lastLoginAt = null;
     }
 
-    public void setPlan(Plan plan) {
-        this.plan = plan;
-    }
-
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Subscription getActiveSubscription() {
+        return subscriptions.stream()
+                .filter(Subscription::isActive)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Plan getCurrentPlan() {
+        Subscription activeSubscription = getActiveSubscription();
+        return activeSubscription != null ? activeSubscription.getPlan() : null;
     }
 
     @Override
     public Long getId() {
         return this.id;
     }
-} 
+}

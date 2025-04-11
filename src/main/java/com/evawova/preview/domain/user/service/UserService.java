@@ -5,6 +5,7 @@ import com.evawova.preview.domain.user.dto.UserDto;
 import com.evawova.preview.domain.user.dto.UserUpdateRequest;
 import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.PlanType;
+import com.evawova.preview.domain.user.entity.Subscription;
 import com.evawova.preview.domain.user.entity.User;
 import com.evawova.preview.domain.user.repository.PlanRepository;
 import com.evawova.preview.domain.user.repository.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,217 +33,290 @@ public class UserService {
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ApplicationEventPublisher eventPublisher;
+    private final SubscriptionService subscriptionService;
 
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream()
+        log.info("모든 사용자 조회 시작");
+        List<User> users = userRepository.findAll();
+        log.info("총 {}명의 사용자 조회 완료", users.size());
+        return users.stream()
                 .map(UserDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
     public UserDto getUserById(Long id) {
+        log.info("ID로 사용자 조회 시작: {}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> {
+                    log.error("ID로 사용자 조회 실패: 사용자를 찾을 수 없음 - ID: {}", id);
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + id);
+                });
+        log.info("ID로 사용자 조회 성공: ID: {}", id);
         return UserDto.fromEntity(user);
     }
 
     public UserDto getUserByEmail(String email) {
+        log.info("이메일로 사용자 조회 시작: {}", email);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + email));
+                .orElseThrow(() -> {
+                    log.error("이메일로 사용자 조회 실패: 사용자를 찾을 수 없음 - 이메일: {}", email);
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + email);
+                });
+        log.info("이메일로 사용자 조회 성공: 이메일: {}", email);
         return UserDto.fromEntity(user);
     }
 
     public UserDto getUserByUid(String uid) {
+        log.info("UID로 사용자 조회 시작: {}", uid);
         User user = userRepository.findByUid(uid)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with uid: " + uid));
+                .orElseThrow(() -> {
+                    log.error("UID로 사용자 조회 실패: 사용자를 찾을 수 없음 - UID: {}", uid);
+                    return new EntityNotFoundException("User not found with uid: " + uid);
+                });
+        log.info("UID로 사용자 조회 성공: UID: {}", uid);
         return UserDto.fromEntity(user);
     }
 
-    // 사용자의 플랜 타입에 따라 적절한 역할을 설정하는 메서드
     private void updateUserRoleBasedOnPlan(User user, PlanType planType) {
-        User.Role role;
+        User.Role targetRole;
         switch (planType) {
             case FREE:
-                role = User.Role.USER_FREE;
+                targetRole = User.Role.USER_FREE;
                 break;
             case STANDARD:
-                role = User.Role.USER_STANDARD;
+                targetRole = User.Role.USER_STANDARD;
                 break;
             case PRO:
-                role = User.Role.USER_PRO;
+                targetRole = User.Role.USER_PRO;
                 break;
             default:
-                role = User.Role.USER_FREE;
+                log.warn("Unknown PlanType: {}. Defaulting role to USER_FREE for user ID: {}", planType, user.getId());
+                targetRole = User.Role.USER_FREE;
                 break;
         }
-        user.setRole(role);
-    }
-
-    @Transactional
-    public UserDto registerUser(String email, String password, String name) {
-        // 이메일 중복 체크
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        if (user.getRole() != targetRole) {
+            log.info("사용자 역할 업데이트: 사용자 ID: {}, 이전 역할: {}, 새 역할: {}, 플랜 타입 기준: {}",
+                    user.getId(), user.getRole(), targetRole, planType);
+            user.setRole(targetRole);
+        } else {
+            log.debug("사용자 역할 변경 없음: 사용자 ID: {}, 현재 역할: {}", user.getId(), targetRole);
         }
-
-        // Free 플랜 조회
-        Plan freePlan = planRepository.findByType(PlanType.FREE)
-                .orElseThrow(() -> new IllegalArgumentException("Free 플랜을 찾을 수 없습니다."));
-
-        // 사용자 생성
-        User user = User.createUser(
-                email,
-                passwordEncoder.encode(password),
-                name,
-                freePlan);
-
-        // 플랜에 따른 역할 설정
-        updateUserRoleBasedOnPlan(user, freePlan.getType());
-
-        // 이벤트 발행
-        eventPublisher.publishEvent(user);
-
-        // 저장 및 반환
-        User savedUser = userRepository.save(user);
-        return UserDto.fromEntity(savedUser);
     }
 
     @Transactional
     public UserDto socialLogin(SocialLoginRequest request) {
-        // uid로 사용자 찾기
-        User user = userRepository.findByUid(request.getUid())
-                .orElseGet(() -> {
-                    // FREE 플랜 조회
-                    Plan freePlan = planRepository.findByType(PlanType.FREE)
-                            .orElseThrow(() -> new IllegalArgumentException("Free 플랜을 찾을 수 없습니다."));
+        log.info("소셜 로그인 처리 시작: UID: {}, 제공자: {}", request.getUid(), request.getProvider());
 
-                    // 사용자가 없으면 새로 생성
+        User user = userRepository.findByUid(request.getUid())
+                .map(existingUser -> {
+                    log.info("기존 사용자 확인됨 (UID: {}). 정보 업데이트 진행.", request.getUid());
+                    if (!existingUser.getProvider().equals(request.getProvider())) {
+                        log.info("사용자 제공자 정보 업데이트: 사용자 ID: {}, 이전 제공자: {}, 새 제공자: {}",
+                                existingUser.getId(), existingUser.getProvider(), request.getProvider());
+                        existingUser.updateSocialInfo(request.getDisplayName(), request.getProvider());
+                    }
+                    existingUser.updateAdditionalInfo(
+                            request.getDisplayName(),
+                            request.getPhotoUrl(),
+                            request.isEmailVerified(),
+                            request.getLastLoginAt());
+                    return existingUser;
+                })
+                .orElseGet(() -> {
+                    log.info("신규 소셜 사용자 생성 시작 (UID: {}).", request.getUid());
+                    Plan freePlan = planRepository.findByType(PlanType.FREE)
+                            .orElseThrow(() -> {
+                                log.error("치명적 오류: 소셜 로그인 중 데이터베이스에 Free 플랜이 설정되지 않았습니다.");
+                                return new IllegalStateException("시스템 설정 오류: Free 플랜을 찾을 수 없습니다.");
+                            });
+
                     User newUser = User.createSocialUser(
                             request.getUid(),
                             request.getEmail(),
                             request.getDisplayName(),
-                            request.getProvider(),
-                            freePlan);
-
-                    // 플랜에 따른 역할 설정
+                            request.getProvider());
                     updateUserRoleBasedOnPlan(newUser, freePlan.getType());
 
-                    return userRepository.save(newUser);
+                    User savedNewUser = userRepository.save(newUser);
+                    log.info("New social user created with ID: {}", savedNewUser.getId());
+
+                    try {
+                        log.info("Creating initial FREE subscription for new social user ID: {}", savedNewUser.getId());
+                        subscriptionService.createSubscription(savedNewUser.getId(), freePlan.getId(),
+                                Subscription.SubscriptionCycle.MONTHLY);
+                        log.info("Initial FREE subscription created successfully for new social user ID: {}",
+                                savedNewUser.getId());
+                    } catch (Exception e) {
+                        log.error("Failed to create initial FREE subscription for new social user ID: {}. Error: {}",
+                                savedNewUser.getId(), e.getMessage(), e);
+                        throw new RuntimeException("초기 구독 생성 중 오류 발생", e);
+                    }
+
+                    return savedNewUser;
                 });
 
-        // 기존 사용자면 소셜 정보 업데이트
-        if (user.getProvider() != request.getProvider()) {
-            user.updateSocialInfo(
-                    request.getDisplayName(),
-                    request.getProvider());
-        }
-
-        // 추가 정보 업데이트
-        user.updateAdditionalInfo(
-                request.getDisplayName(),
-                request.getPhotoUrl(),
-                request.isEmailVerified(),
-                request.getLastLoginAt());
-
+        log.info("Social login successful for user ID: {}", user.getId());
         return UserDto.fromEntity(user);
     }
 
     @Transactional
     public UserDto changePlan(Long userId, PlanType planType) {
+        log.info("Attempting to change role for user ID: {} based on requested PlanType: {}", userId, planType);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+                .orElseThrow(() -> {
+                    log.error("Failed to change role: User not found with ID: {}", userId);
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + userId);
+                });
 
-        Plan newPlan = planRepository.findByType(planType)
-                .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + planType));
+        Plan targetPlan = planRepository.findByType(planType)
+                .orElseThrow(() -> {
+                    log.error("Failed to change role for user ID: {}: PlanType {} not found.", userId, planType);
+                    return new IllegalArgumentException("존재하지 않는 플랜 타입입니다: " + planType);
+                });
 
-        user.changePlan(newPlan);
+        updateUserRoleBasedOnPlan(user, targetPlan.getType());
 
-        // 플랜에 따른 역할 업데이트
-        updateUserRoleBasedOnPlan(user, planType);
-
-        // 도메인 이벤트 발행
-        eventPublisher.publishEvent(user);
+        log.warn("User role updated for user ID: {}. Actual plan change needs to be handled via SubscriptionService.",
+                userId);
 
         return UserDto.fromEntity(user);
     }
 
     @Transactional
-    public void withdrawUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
-
-        // 사용자 탈퇴 처리
-        user.withdraw();
-    }
-
-    @Transactional
     public UserDto changeUserPlanByUid(String uid, PlanType planType) {
+        log.info("Attempting to change role for user UID: {} based on requested PlanType: {}", uid, planType);
         User user = userRepository.findByUid(uid)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + uid));
+                .orElseThrow(() -> {
+                    log.error("Failed to change role: User not found with UID: {}", uid);
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + uid);
+                });
 
-        Plan plan = planRepository.findByType(planType)
-                .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + planType));
+        Plan targetPlan = planRepository.findByType(planType)
+                .orElseThrow(() -> {
+                    log.error("Failed to change role for user UID: {}: PlanType {} not found.", uid, planType);
+                    return new IllegalArgumentException("존재하지 않는 플랜 타입입니다: " + planType);
+                });
 
-        user.setPlan(plan);
+        updateUserRoleBasedOnPlan(user, targetPlan.getType());
 
-        // 플랜에 따른 역할 업데이트
-        updateUserRoleBasedOnPlan(user, planType);
+        log.warn("User role updated for user UID: {}. Actual plan change needs to be handled via SubscriptionService.",
+                uid);
 
         User savedUser = userRepository.save(user);
+
         return UserDto.fromEntity(savedUser);
     }
 
-    /**
-     * 모든 사용자의 역할을 현재 플랜에 맞게 업데이트합니다.
-     * 이 메서드는 애플리케이션 시작 시 또는 역할 체계 변경 후 호출될 수 있습니다.
-     */
+    @Transactional
+    public void withdrawUser(Long userId) {
+        log.info("Withdrawing user with ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("Withdrawal failed: User not found with ID: {}", userId);
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + userId);
+                });
+
+        try {
+            log.info("Cancelling active subscription for withdrawing user ID: {}", userId);
+            subscriptionService.cancelActiveSubscriptionByUserId(userId, "User withdrawal");
+            log.info("Subscription cancellation processed for user ID: {}", userId);
+        } catch (Exception e) {
+            log.error(
+                    "Error cancelling subscription for user ID: {} during withdrawal. Proceeding with withdrawal. Error: {}",
+                    userId, e.getMessage(), e);
+        }
+
+        user.withdraw();
+        log.info("User withdrawal process completed for user ID: {}", userId);
+    }
+
     @Transactional
     public void migrateUserRoles() {
+        log.info("Starting user role migration process...");
         List<User> users = userRepository.findAll();
+        log.info("Found {} users to check for role migration.", users.size());
+        int updatedCount = 0;
+        List<User> usersToSave = new ArrayList<>();
 
         for (User user : users) {
-            // 관리자 계정은 플랜에 관계없이 ADMIN 유지
             if (user.getRole() == User.Role.ADMIN) {
+                log.debug("Skipping role migration for ADMIN user ID: {}", user.getId());
                 continue;
             }
 
-            // 사용자 플랜에 따라 역할 업데이트
-            updateUserRoleBasedOnPlan(user, user.getPlan().getType());
+            Subscription activeSubscription = user.getActiveSubscription();
+            PlanType currentPlanType;
+
+            if (activeSubscription != null && activeSubscription.getPlan() != null) {
+                currentPlanType = activeSubscription.getPlan().getType();
+                log.debug("User ID: {} has active subscription with PlanType: {}", user.getId(), currentPlanType);
+            } else {
+                log.warn("User ID: {} has no active subscription. Assuming FREE plan for role migration.",
+                        user.getId());
+                currentPlanType = PlanType.FREE;
+            }
+
+            User.Role originalRole = user.getRole();
+            updateUserRoleBasedOnPlan(user, currentPlanType);
+
+            if (user.getRole() != originalRole) {
+                updatedCount++;
+                usersToSave.add(user);
+                log.info("Role changed for user ID: {} from {} to {}. Added to save list.", user.getId(), originalRole,
+                        user.getRole());
+            }
         }
 
-        // 저장
-        userRepository.saveAll(users);
-        log.info("사용자 역할 마이그레이션 완료: {} 명의 사용자 업데이트됨", users.size());
+        if (!usersToSave.isEmpty()) {
+            log.info("Saving {} users with updated roles...", usersToSave.size());
+            userRepository.saveAll(usersToSave);
+            log.info("Successfully saved updated roles.");
+        } else {
+            log.info("No user roles needed updating during migration.");
+        }
+        log.info("User role migration process completed. {} users had their roles updated.", updatedCount);
     }
 
-    /**
-     * 사용자 정보를 업데이트합니다. (uid 기반)
-     */
     @Transactional
     public UserDto updateUser(String uid, UserUpdateRequest updateRequest) {
+        log.info("Updating user information for UID: {}", uid);
         User user = userRepository.findByUid(uid)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + uid));
+                .orElseThrow(() -> {
+                    log.error("Update failed: User not found with UID: {}", uid);
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + uid);
+                });
 
-        // 더티 체킹을 통한 업데이트
+        log.debug("Current displayName: {}, Requested displayName: {}", user.getDisplayName(),
+                updateRequest.getDisplayName());
         user.updateAdditionalInfo(
                 updateRequest.getDisplayName(),
-                user.getPhotoUrl(), // 기존 값 유지
-                user.isEmailVerified(), // 기존 값 유지
-                user.getLastLoginAt() // 기존 값 유지
-        );
-
-        // 추후 필요한 필드가 추가될 경우 여기에 업데이트 로직 추가
+                user.getPhotoUrl(),
+                user.isEmailVerified(),
+                user.getLastLoginAt());
+        log.info("User information updated successfully for UID: {}", uid);
 
         return UserDto.fromEntity(user);
     }
 
     @Transactional(readOnly = true)
     public User getCurrentUser() {
-        FirebaseUserDetails principal = (FirebaseUserDetails) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        log.debug("Fetching current authenticated user");
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return userRepository.findByUid(principal.getUid())
-                .orElseThrow(() -> new IllegalStateException("사용자 정보를 찾을 수 없습니다."));
+        if (!(principal instanceof FirebaseUserDetails)) {
+            log.error("Authentication principal is not an instance of FirebaseUserDetails: {}",
+                    principal.getClass().getName());
+            throw new IllegalStateException("인증 정보를 찾을 수 없습니다.");
+        }
+
+        FirebaseUserDetails userDetails = (FirebaseUserDetails) principal;
+        String uid = userDetails.getUid();
+        log.debug("Current user UID from security context: {}", uid);
+
+        return userRepository.findByUid(uid)
+                .orElseThrow(() -> {
+                    log.error("Authenticated user with UID: {} not found in database.", uid);
+                    return new IllegalStateException("인증된 사용자 정보를 데이터베이스에서 찾을 수 없습니다.");
+                });
     }
 }
