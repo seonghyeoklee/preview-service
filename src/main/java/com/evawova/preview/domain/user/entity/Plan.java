@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,10 +27,6 @@ public class Plan extends AggregateRoot<Long> {
     @Comment("플랜 고유 식별자")
     private Long id;
 
-    @Column(nullable = false)
-    @Comment("플랜 이름")
-    private String name;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Comment("플랜 타입")
@@ -37,11 +34,11 @@ public class Plan extends AggregateRoot<Long> {
 
     @Column(nullable = false)
     @Comment("월간 가격")
-    private Integer monthlyPrice;
+    private BigDecimal monthlyPrice;
 
     @Column(nullable = false)
     @Comment("연간 가격")
-    private Integer annualPrice;
+    private BigDecimal annualPrice;
 
     @Column(nullable = false)
     @Comment("월간 토큰 사용량 제한")
@@ -71,17 +68,14 @@ public class Plan extends AggregateRoot<Long> {
     }
 
     public static Plan createPlan(
-            String name,
             PlanType type,
-            Integer monthlyPrice,
-            Integer annualPrice,
+            BigDecimal monthlyPrice,
+            BigDecimal annualPrice,
             Integer monthlyTokenLimit,
-            boolean active
-    ) {
+            boolean active) {
         validatePlan(type, monthlyPrice, annualPrice, monthlyTokenLimit);
 
         Plan plan = Plan.builder()
-                .name(name)
                 .type(type)
                 .monthlyPrice(monthlyPrice)
                 .annualPrice(annualPrice)
@@ -90,24 +84,21 @@ public class Plan extends AggregateRoot<Long> {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        
+
         // 도메인 이벤트 등록
-        plan.registerEvent(new PlanCreatedEvent(plan.id, plan.name, plan.type));
-        
+        plan.registerEvent(new PlanCreatedEvent(plan.id, plan.type));
+
         return plan;
     }
 
     public void updatePlan(
-            String name,
             PlanType type,
-            Integer monthlyPrice,
-            Integer annualPrice,
+            BigDecimal monthlyPrice,
+            BigDecimal annualPrice,
             Integer monthlyTokenLimit,
-            boolean active
-    ) {
+            boolean active) {
         validatePlan(type, monthlyPrice, annualPrice, monthlyTokenLimit);
 
-        this.name = name;
         this.type = type;
         this.monthlyPrice = monthlyPrice;
         this.annualPrice = annualPrice;
@@ -121,11 +112,11 @@ public class Plan extends AggregateRoot<Long> {
 
     private static void validatePlan(
             PlanType type,
-            Integer monthlyPrice,
-            Integer annualPrice,
-            Integer monthlyTokenLimit
-    ) {
-        if (type == PlanType.FREE && (monthlyPrice > 0 || annualPrice > 0)) {
+            BigDecimal monthlyPrice,
+            BigDecimal annualPrice,
+            Integer monthlyTokenLimit) {
+        if (type == PlanType.FREE
+                && (monthlyPrice.compareTo(BigDecimal.ZERO) > 0 || annualPrice.compareTo(BigDecimal.ZERO) > 0)) {
             throw new IllegalArgumentException("무료 플랜의 가격은 0이어야 합니다");
         }
 
@@ -133,9 +124,4 @@ public class Plan extends AggregateRoot<Long> {
             throw new IllegalArgumentException("프로 플랜은 최소 100,000개의 월간 토큰을 가질 수 있어야 합니다");
         }
     }
-
-    @Override
-    public Long getId() {
-        return this.id;
-    }
-} 
+}

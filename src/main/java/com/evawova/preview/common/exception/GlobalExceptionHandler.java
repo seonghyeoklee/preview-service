@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleApiException(ApiException e,
             HttpServletRequest request) {
+
         log.error("API 예외 발생: {}", e.getMessage());
 
         Map<String, Object> errorDetails = new HashMap<>();

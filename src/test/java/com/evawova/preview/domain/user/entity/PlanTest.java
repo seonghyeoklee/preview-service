@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.math.BigDecimal;
+
 class PlanTest {
 
     @Test
@@ -13,16 +15,13 @@ class PlanTest {
     void createPlan() {
         // when
         Plan plan = Plan.createPlan(
-                "Standard",
                 PlanType.STANDARD,
-                9900,
-                99000,
-                50000,  // 50,000 토큰
-                true
-        );
+                BigDecimal.valueOf(9900),
+                BigDecimal.valueOf(99000),
+                50000,
+                true);
 
         // then
-        assertThat(plan.getName()).isEqualTo("Standard");
         assertThat(plan.getType()).isEqualTo(PlanType.STANDARD);
         assertThat(plan.getMonthlyPrice()).isEqualTo(9900);
         assertThat(plan.getAnnualPrice()).isEqualTo(99000);
@@ -35,26 +34,21 @@ class PlanTest {
     void updatePlan() {
         // given
         Plan plan = Plan.createPlan(
-                "Standard",
                 PlanType.STANDARD,
-                9900,
-                99000,
-                50000,  // 50,000 토큰
-                true
-        );
+                BigDecimal.valueOf(9900),
+                BigDecimal.valueOf(99000),
+                50000,
+                true);
 
         // when
         plan.updatePlan(
-                "Pro",
                 PlanType.PRO,
-                19900,
-                199000,
-                100000, // 100,000 토큰
-                true
-        );
+                BigDecimal.valueOf(19900),
+                BigDecimal.valueOf(199000),
+                100000,
+                true);
 
         // then
-        assertThat(plan.getName()).isEqualTo("Pro");
         assertThat(plan.getType()).isEqualTo(PlanType.PRO);
         assertThat(plan.getMonthlyPrice()).isEqualTo(19900);
         assertThat(plan.getAnnualPrice()).isEqualTo(199000);
@@ -67,13 +61,11 @@ class PlanTest {
     void deactivatePlan() {
         // given
         Plan plan = Plan.createPlan(
-                "Standard",
                 PlanType.STANDARD,
-                9900,
-                99000,
-                50000,  // 50,000 토큰
-                true
-        );
+                BigDecimal.valueOf(9900),
+                BigDecimal.valueOf(99000),
+                50000,
+                true);
 
         // when
         plan.deactivate();
@@ -82,55 +74,4 @@ class PlanTest {
         assertThat(plan.isActive()).isFalse();
     }
 
-    @Test
-    @DisplayName("무료 플랜은 가격이 0이어야 한다")
-    void freePlanPriceValidation() {
-        // when & then
-        assertThatThrownBy(() -> Plan.createPlan(
-                "Free",
-                PlanType.FREE,
-                1000,
-                10000,
-                10000,  // 10,000 토큰
-                true
-        )).isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("무료 플랜의 가격은 0이어야 합니다");
-
-        // when & then
-        assertThatThrownBy(() -> Plan.createPlan(
-                "Free",
-                PlanType.FREE,
-                0,
-                10000,
-                10000,  // 10,000 토큰
-                true
-        )).isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("무료 플랜의 가격은 0이어야 합니다");
-
-        // when & then
-        assertThatThrownBy(() -> Plan.createPlan(
-                "Free",
-                PlanType.FREE,
-                1000,
-                0,
-                10000,  // 10,000 토큰
-                true
-        )).isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("무료 플랜의 가격은 0이어야 합니다");
-    }
-
-    @Test
-    @DisplayName("프로 플랜은 최소 100,000개의 월간 토큰을 가져야 한다")
-    void proPlanLimitsValidation() {
-        // when & then
-        assertThatThrownBy(() -> Plan.createPlan(
-                "Pro",
-                PlanType.PRO,
-                19900,
-                199000,
-                50000,  // 50,000 토큰
-                true
-        )).isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("프로 플랜은 최소 100,000개의 월간 토큰을 가질 수 있어야 합니다");
-    }
-} 
+}

@@ -1,5 +1,6 @@
 package com.evawova.preview.domain.subscription.entity;
 
+import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,7 +31,7 @@ public class Subscription {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
     @Comment("구독 플랜")
-    private SubscriptionPlan plan;
+    private Plan plan;
 
     @Column(nullable = false)
     @Comment("구독 상태")

@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -71,10 +72,9 @@ class UserControllerTest {
         // Plan 객체 생성
         Plan freePlan = Plan.builder()
                 .id(1L)
-                .name("Free")
                 .type(PlanType.FREE)
-                .monthlyPrice(0)
-                .annualPrice(0)
+                .monthlyPrice(BigDecimal.ZERO)
+                .annualPrice(BigDecimal.ZERO)
                 .monthlyTokenLimit(10000)
                 .active(true)
                 .build();

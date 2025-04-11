@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,26 +45,23 @@ class PlanControllerTest {
     void setUp() {
         // 테스트를 위한 플랜 데이터 설정
         freePlan = Plan.createPlan(
-                "Free",
                 PlanType.FREE,
-                0,
-                0,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
                 10000,  // 10,000 토큰
                 true
         );
         standardPlan = Plan.createPlan(
-                "Standard",
                 PlanType.STANDARD,
-                9900,
-                99000,
+                BigDecimal.valueOf(9900),
+                BigDecimal.valueOf(99000),
                 50000,  // 50,000 토큰
                 true
         );
         proPlan = Plan.createPlan(
-                "Pro",
                 PlanType.PRO,
-                19900,
-                199000,
+                BigDecimal.valueOf(19900),
+                BigDecimal.valueOf(199000),
                 100000, // 100,000 토큰
                 true
         );

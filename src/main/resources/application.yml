@@ -98,7 +98,6 @@ spring:
 logging:
   level:
     com.evawova.preview.common.filter: warn
-    root: info
 
 springdoc:
   swagger-ui:

@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PlanDto {
     private Long id;
-    private String name;
     private PlanType type;
     private Integer monthlyPrice;
     private Integer annualPrice;
@@ -24,10 +23,9 @@ public class PlanDto {
     public static PlanDto fromEntity(Plan plan) {
         return PlanDto.builder()
                 .id(plan.getId())
-                .name(plan.getName())
                 .type(plan.getType())
-                .monthlyPrice(plan.getMonthlyPrice())
-                .annualPrice(plan.getAnnualPrice())
+                .monthlyPrice(plan.getMonthlyPrice().intValue())
+                .annualPrice(plan.getAnnualPrice().intValue())
                 .monthlyTokenLimit(plan.getMonthlyTokenLimit())
                 .active(plan.isActive())
                 .build();

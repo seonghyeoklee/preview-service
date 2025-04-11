@@ -1,6 +1,8 @@
 package com.evawova.preview.domain.interview.entity;
 
+import com.evawova.preview.domain.interview.entity.enums.InterviewSessionStatus;
 import com.evawova.preview.domain.subscription.entity.SubscriptionUsage;
+import com.evawova.preview.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
@@ -23,36 +25,36 @@ public class InterviewSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "settings_id")
-    @Comment("인터뷰 설정")
-    private InterviewSettings settings;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_usage_id")
-    @Comment("구독 사용량")
-    private SubscriptionUsage subscriptionUsage;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    @Comment("세션 상태")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private InterviewSessionStatus status;
 
     @Column(nullable = false)
-    @Comment("시작 시간")
-    private LocalDateTime startedAt;
-
-    @Column
-    @Comment("종료 시간")
-    private LocalDateTime endedAt;
+    private LocalDateTime startTime;
 
     @Column(nullable = false)
-    @Comment("총 대화 수")
-    private int totalMessages;
+    private LocalDateTime expectedEndTime;
 
     @Column(nullable = false)
-    @Comment("총 토큰 수")
-    private int totalTokens;
+    private LocalDateTime endTime;
+
+    @Column(nullable = false)
+    private Integer totalConversationCount;
+
+    @Column(nullable = false)
+    private Integer totalTokenCount;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "settings_id", nullable = false)
+    private InterviewSettings settings;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_usage_id", nullable = false)
+    private SubscriptionUsage subscriptionUsage;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -68,12 +70,6 @@ public class InterviewSession {
     @Comment("수정 시간")
     private LocalDateTime updatedAt;
 
-    public enum InterviewSessionStatus {
-        IN_PROGRESS, // 진행 중
-        COMPLETED, // 완료
-        CANCELLED // 취소
-    }
-
     public void setSettings(InterviewSettings settings) {
         this.settings = settings;
         settings.setSession(this);
@@ -86,16 +82,16 @@ public class InterviewSession {
     public void addMessage(InterviewMessage message) {
         this.messages.add(message);
         message.setSession(this);
-        this.totalMessages++;
+        this.totalConversationCount++;
     }
 
     public void endSession() {
         this.status = InterviewSessionStatus.COMPLETED;
-        this.endedAt = LocalDateTime.now();
+        this.endTime = LocalDateTime.now();
     }
 
     public void cancelSession() {
         this.status = InterviewSessionStatus.CANCELLED;
-        this.endedAt = LocalDateTime.now();
+        this.endTime = LocalDateTime.now();
     }
 }

@@ -6,6 +6,9 @@ import com.evawova.preview.domain.user.entity.PlanType;
 import com.evawova.preview.domain.user.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,29 +34,26 @@ public class PlanInitializer implements EntityInitializer {
 
         // 무료 플랜
         Plan freePlan = Plan.createPlan(
-                "Free Plan",
                 PlanType.FREE,
-                0,
-                0,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
                 10000, // 월 1만 토큰
                 true);
 
         // 스탠다드 플랜
         Plan standardPlan = Plan.createPlan(
-                "Standard Plan",
                 PlanType.STANDARD,
-                9900,
-                99000,
+                BigDecimal.valueOf(9900),
+                BigDecimal.valueOf(99000),
                 50000, // 월 5만 토큰
                 true);
 
         // 프로 플랜
         Plan proPlan = Plan.createPlan(
-                "Pro Plan",
                 PlanType.PRO,
-                1900,
-                19000,
-                100000, // 월 10만 토큰
+                BigDecimal.valueOf(1900),
+                BigDecimal.valueOf(19000),
+                100000,
                 true);
 
         planRepository.saveAll(java.util.List.of(freePlan, standardPlan, proPlan));

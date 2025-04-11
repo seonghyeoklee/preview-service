@@ -7,13 +7,11 @@ import lombok.Getter;
 @Getter
 public class PlanCreatedEvent extends AbstractDomainEvent {
     private final Long planId;
-    private final String name;
     private final PlanType planType;
 
-    public PlanCreatedEvent(Long planId, String name, PlanType planType) {
+    public PlanCreatedEvent(Long planId, PlanType planType) {
         super();
         this.planId = planId;
-        this.name = name;
         this.planType = planType;
     }
-} 
+}

@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 
 public class WithMockFirebaseUserSecurityContextFactory implements WithSecurityContextFactory<WithMockFirebaseUser> {
@@ -19,27 +20,23 @@ public class WithMockFirebaseUserSecurityContextFactory implements WithSecurityC
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
         User user = User.createSocialUser(
-            annotation.uid(),
-            annotation.email(),
-            annotation.displayName(),
-            User.Provider.GOOGLE,
-            Plan.createPlan(
-                "Free",
-                PlanType.FREE,
-                0,
-                0,
-                10000,
-                true
-            )
-        );
+                annotation.uid(),
+                annotation.email(),
+                annotation.displayName(),
+                User.Provider.GOOGLE,
+                Plan.createPlan(
+                        PlanType.FREE,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        10000,
+                        true));
 
         FirebaseUserDetails principal = new FirebaseUserDetails(user);
-        
+
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                principal, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + annotation.role()))
-        );
-        
+                principal, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + annotation.role())));
+
         context.setAuthentication(auth);
         return context;
     }
-} 
+}

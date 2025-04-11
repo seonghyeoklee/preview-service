@@ -8,11 +8,13 @@ import com.evawova.preview.domain.user.entity.PlanType;
 import com.evawova.preview.domain.user.entity.User;
 import com.evawova.preview.domain.user.repository.PlanRepository;
 import com.evawova.preview.domain.user.repository.UserRepository;
+import com.evawova.preview.security.FirebaseUserDetails;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,8 +93,7 @@ public class UserService {
                 email,
                 passwordEncoder.encode(password),
                 name,
-                freePlan
-        );
+                freePlan);
 
         // 플랜에 따른 역할 설정
         updateUserRoleBasedOnPlan(user, freePlan.getType());
@@ -113,37 +114,34 @@ public class UserService {
                     // FREE 플랜 조회
                     Plan freePlan = planRepository.findByType(PlanType.FREE)
                             .orElseThrow(() -> new IllegalArgumentException("Free 플랜을 찾을 수 없습니다."));
-                    
+
                     // 사용자가 없으면 새로 생성
                     User newUser = User.createSocialUser(
                             request.getUid(),
                             request.getEmail(),
                             request.getDisplayName(),
                             request.getProvider(),
-                            freePlan
-                    );
-                    
+                            freePlan);
+
                     // 플랜에 따른 역할 설정
                     updateUserRoleBasedOnPlan(newUser, freePlan.getType());
-                    
+
                     return userRepository.save(newUser);
                 });
 
         // 기존 사용자면 소셜 정보 업데이트
         if (user.getProvider() != request.getProvider()) {
             user.updateSocialInfo(
-                request.getDisplayName(), 
-                request.getProvider()
-            );
+                    request.getDisplayName(),
+                    request.getProvider());
         }
 
         // 추가 정보 업데이트
         user.updateAdditionalInfo(
-            request.getDisplayName(),
-            request.getPhotoUrl(),
-            request.isEmailVerified(),
-            request.getLastLoginAt()
-        );
+                request.getDisplayName(),
+                request.getPhotoUrl(),
+                request.isEmailVerified(),
+                request.getLastLoginAt());
 
         return UserDto.fromEntity(user);
     }
@@ -157,13 +155,13 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + planType));
 
         user.changePlan(newPlan);
-        
+
         // 플랜에 따른 역할 업데이트
         updateUserRoleBasedOnPlan(user, planType);
-        
+
         // 도메인 이벤트 발행
         eventPublisher.publishEvent(user);
-        
+
         return UserDto.fromEntity(user);
     }
 
@@ -171,7 +169,7 @@ public class UserService {
     public void withdrawUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
-        
+
         // 사용자 탈퇴 처리
         user.withdraw();
     }
@@ -180,15 +178,15 @@ public class UserService {
     public UserDto changeUserPlanByUid(String uid, PlanType planType) {
         User user = userRepository.findByUid(uid)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + uid));
-        
+
         Plan plan = planRepository.findByType(planType)
                 .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + planType));
-        
+
         user.setPlan(plan);
-        
+
         // 플랜에 따른 역할 업데이트
         updateUserRoleBasedOnPlan(user, planType);
-        
+
         User savedUser = userRepository.save(user);
         return UserDto.fromEntity(savedUser);
     }
@@ -200,17 +198,17 @@ public class UserService {
     @Transactional
     public void migrateUserRoles() {
         List<User> users = userRepository.findAll();
-        
+
         for (User user : users) {
             // 관리자 계정은 플랜에 관계없이 ADMIN 유지
             if (user.getRole() == User.Role.ADMIN) {
                 continue;
             }
-            
+
             // 사용자 플랜에 따라 역할 업데이트
             updateUserRoleBasedOnPlan(user, user.getPlan().getType());
         }
-        
+
         // 저장
         userRepository.saveAll(users);
         log.info("사용자 역할 마이그레이션 완료: {} 명의 사용자 업데이트됨", users.size());
@@ -223,17 +221,27 @@ public class UserService {
     public UserDto updateUser(String uid, UserUpdateRequest updateRequest) {
         User user = userRepository.findByUid(uid)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + uid));
-        
+
         // 더티 체킹을 통한 업데이트
         user.updateAdditionalInfo(
-            updateRequest.getDisplayName(),
-            user.getPhotoUrl(),  // 기존 값 유지
-            user.isEmailVerified(),  // 기존 값 유지
-            user.getLastLoginAt()  // 기존 값 유지
+                updateRequest.getDisplayName(),
+                user.getPhotoUrl(), // 기존 값 유지
+                user.isEmailVerified(), // 기존 값 유지
+                user.getLastLoginAt() // 기존 값 유지
         );
-        
+
         // 추후 필요한 필드가 추가될 경우 여기에 업데이트 로직 추가
-        
+
         return UserDto.fromEntity(user);
     }
-} 
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        FirebaseUserDetails principal = (FirebaseUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return userRepository.findByUid(principal.getUid())
+                .orElseThrow(() -> new IllegalStateException("사용자 정보를 찾을 수 없습니다."));
+    }
+}

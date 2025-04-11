@@ -19,6 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -59,37 +60,30 @@ class UserServiceTest {
     void setUp() {
         // 테스트를 위한 플랜 데이터 설정
         freePlan = Plan.createPlan(
-                "Free",
                 PlanType.FREE,
-                0,
-                0,
-                10000,  // 10,000 토큰
-                true
-        );
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                10000,
+                true);
         standardPlan = Plan.createPlan(
-                "Standard",
                 PlanType.STANDARD,
-                9900,
-                99000,
-                50000,  // 50,000 토큰
-                true
-        );
+                BigDecimal.valueOf(9900),
+                BigDecimal.valueOf(99000),
+                50000,
+                true);
         proPlan = Plan.createPlan(
-                "Pro",
                 PlanType.PRO,
-                19900,
-                199000,
-                100000, // 100,000 토큰
-                true
-        );
+                BigDecimal.valueOf(19900),
+                BigDecimal.valueOf(199000),
+                100000,
+                true);
 
         // 테스트를 위한 사용자 설정
         testUser = User.createUser(
                 "test@example.com",
                 "encoded_password",
                 "Test User",
-                freePlan
-        );
+                freePlan);
 
         socialLoginRequest = new SocialLoginRequest();
         socialLoginRequest.setUid("123456789");
@@ -182,7 +176,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail(email)).thenReturn(false);
         when(planRepository.findByType(PlanType.FREE)).thenReturn(Optional.of(freePlan));
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
-        
+
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         when(userRepository.save(userCaptor.capture())).thenAnswer(invocation -> {
             User savedUser = userCaptor.getValue();
@@ -199,7 +193,7 @@ class UserServiceTest {
         assertThat(capturedUser.getPassword()).isEqualTo(encodedPassword);
         assertThat(capturedUser.getDisplayName()).isEqualTo(name);
         assertThat(capturedUser.getPlan()).isEqualTo(freePlan);
-        
+
         verify(eventPublisher).publishEvent(any(User.class));
     }
 
@@ -258,4 +252,4 @@ class UserServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("플랜을 찾을 수 없습니다");
     }
-} 
+}
