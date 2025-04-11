@@ -69,16 +69,6 @@ class UserControllerTest {
                 .alwaysDo(print())
                 .build();
 
-        // Plan 객체 생성
-        Plan freePlan = Plan.builder()
-                .id(1L)
-                .type(PlanType.FREE)
-                .monthlyPrice(BigDecimal.ZERO)
-                .annualPrice(BigDecimal.ZERO)
-                .monthlyTokenLimit(10000)
-                .active(true)
-                .build();
-
         testUser = User.builder()
                 .id(1L)
                 .uid(TEST_UID)
@@ -86,13 +76,12 @@ class UserControllerTest {
                 .displayName("Test User")
                 .provider(User.Provider.GOOGLE)
                 .role(User.Role.USER_FREE)
-                .active(true)
+                .isActive(true)
                 .photoUrl("https://example.com/photo.jpg")
                 .isEmailVerified(true)
                 .lastLoginAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .plan(freePlan) // Plan 설정
                 .build();
 
         testUserDto = UserDto.fromEntity(testUser);
@@ -105,7 +94,7 @@ class UserControllerTest {
         given(userService.getUserByUid(TEST_UID)).willReturn(testUserDto);
 
         MvcResult result = mockMvc.perform(get("/api/v1/users/me")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -116,9 +105,9 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.displayName").value(testUser.getDisplayName()))
                 .andExpect(jsonPath("$.data.provider").value(testUser.getProvider().name()))
                 .andExpect(jsonPath("$.data.role").value(testUser.getRole().name()))
-                .andExpect(jsonPath("$.data.active").value(testUser.isActive()))
+                .andExpect(jsonPath("$.data.isActive").value(testUser.getIsActive()))
                 .andExpect(jsonPath("$.data.photoUrl").value(testUser.getPhotoUrl()))
-                .andExpect(jsonPath("$.data.isEmailVerified").value(testUser.isEmailVerified()))
+                .andExpect(jsonPath("$.data.isEmailVerified").value(testUser.getIsEmailVerified()))
                 .andReturn();
 
         System.out.println("Response Body: " + result.getResponse().getContentAsString());
@@ -131,7 +120,7 @@ class UserControllerTest {
         given(userService.getAllUsers()).willReturn(List.of(testUserDto));
 
         mockMvc.perform(get("/api/v1/users")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -146,7 +135,7 @@ class UserControllerTest {
     @WithMockFirebaseUser(uid = "test-uid-123", role = "USER")
     void getAllUsers_AsUser_Forbidden() throws Exception {
         mockMvc.perform(get("/api/v1/users")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -155,7 +144,7 @@ class UserControllerTest {
     @DisplayName("인증되지 않은 사용자가 내 정보 조회 시도")
     void getMyInfo_Unauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/users/me")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -168,7 +157,7 @@ class UserControllerTest {
                 .willThrow(new IllegalArgumentException("User not found"));
 
         mockMvc.perform(get("/api/v1/users/me")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -184,7 +173,7 @@ class UserControllerTest {
                 .email("test@example.com")
                 .displayName("Test User")
                 .role(User.Role.USER_FREE)
-                .active(true)
+                .isActive(true)
                 .build();
 
         given(userService.getUserByUid("test-uid")).willReturn(userDto);
@@ -214,7 +203,7 @@ class UserControllerTest {
                 .email("test@example.com")
                 .displayName("Updated Name")
                 .role(User.Role.USER_FREE)
-                .active(true)
+                .isActive(true)
                 .build();
 
         given(userService.updateUser(eq("test-uid"), any(UserUpdateRequest.class))).willReturn(updatedUserDto);
@@ -245,4 +234,4 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
-} 
+}

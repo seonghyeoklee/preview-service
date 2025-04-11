@@ -24,7 +24,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -42,23 +41,22 @@ public class AuthController {
 
         // 소셜 로그인 처리
         UserDto userDto = userService.socialLogin(request);
-        
+
         // 로그인 성공 로그
         User user = userRepository.findById(userDto.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         UserLoginLog loginLog = loginLogService.logSuccessfulLogin(user, httpRequest);
-        
+
         // 응답 데이터 구성
         Map<String, Object> response = new HashMap<>();
         response.put("user", userDto);
         response.put("loginInfo", Map.of(
-            "loginAt", loginLog.getLoginAt(),
-            "ipAddress", loginLog.getIpAddress(),
-            "deviceType", loginLog.getDeviceType(),
-            "browserInfo", loginLog.getBrowserInfo(),
-            "osInfo", loginLog.getOsInfo()
-        ));
-        
+                "loginAt", loginLog.getLoginAt(),
+                "ipAddress", loginLog.getIpAddress(),
+                "deviceType", loginLog.getDeviceType(),
+                "browserInfo", loginLog.getBrowserInfo(),
+                "osInfo", loginLog.getOsInfo()));
+
         return ResponseEntity.ok(ApiResponse.success(response, "소셜 로그인이 완료되었습니다."));
     }
 
@@ -74,10 +72,10 @@ public class AuthController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Boolean success) {
-        
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        
+
         List<UserLoginLogDto> loginHistory;
         if (startDate != null && endDate != null) {
             LocalDateTime startDateTime = startDate.atStartOfDay();
@@ -85,20 +83,20 @@ public class AuthController {
             loginHistory = loginLogService.getLoginHistoryByDateRange(user, startDateTime, endDateTime)
                     .stream()
                     .map(UserLoginLogDto::fromEntity)
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             loginHistory = loginLogService.getLoginHistory(user)
                     .stream()
                     .map(UserLoginLogDto::fromEntity)
-                    .collect(Collectors.toList());
+                    .toList();
         }
-        
+
         if (success != null) {
             loginHistory = loginHistory.stream()
                     .filter(log -> log.isSuccessful() == success)
-                    .collect(Collectors.toList());
+                    .toList();
         }
-        
+
         return ResponseEntity.ok(ApiResponse.success(loginHistory, "로그인 내역을 조회했습니다."));
     }
-} 
+}

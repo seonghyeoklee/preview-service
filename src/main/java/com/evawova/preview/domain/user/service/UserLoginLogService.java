@@ -36,10 +36,10 @@ public class UserLoginLogService {
     private UserLoginLog buildLoginLog(User user, HttpServletRequest request, boolean successful, String failReason) {
         String ipAddress = getClientIpAddress(request);
         String userAgent = request.getHeader("User-Agent");
-        
+
         // 디바이스, 브라우저, OS 정보 추출
         DeviceInfo deviceInfo = parseUserAgent(userAgent);
-        
+
         return UserLoginLog.builder()
                 .user(user)
                 .ipAddress(ipAddress)
@@ -55,17 +55,10 @@ public class UserLoginLogService {
     public List<UserLoginLog> getLoginHistory(User user) {
         return loginLogRepository.findByUserOrderByLoginAtDesc(user);
     }
-    
-    public List<UserLoginLog> getLoginHistoryByDateRange(User user, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+
+    public List<UserLoginLog> getLoginHistoryByDateRange(User user, LocalDateTime startDateTime,
+            LocalDateTime endDateTime) {
         return loginLogRepository.findByUserAndLoginAtBetweenOrderByLoginAtDesc(user, startDateTime, endDateTime);
-    }
-
-    public List<UserLoginLog> getSuccessfulLogins(User user) {
-        return loginLogRepository.findByUserAndSuccessfulIsTrueOrderByLoginAtDesc(user);
-    }
-
-    public List<UserLoginLog> getFailedLogins(User user) {
-        return loginLogRepository.findByUserAndSuccessfulIsFalseOrderByLoginAtDesc(user);
     }
 
     // 클라이언트 IP 주소 추출
@@ -88,17 +81,17 @@ public class UserLoginLogService {
         }
         return ipAddress;
     }
-    
+
     // User-Agent 파싱을 위한 간단한 구현 (실제로는 더 정교한 라이브러리 사용 권장)
     private DeviceInfo parseUserAgent(String userAgent) {
         DeviceInfo info = new DeviceInfo();
-        
+
         if (userAgent == null) {
             return info;
         }
-        
+
         userAgent = userAgent.toLowerCase();
-        
+
         // 디바이스 타입 판별
         if (userAgent.contains("mobile") || userAgent.contains("android") || userAgent.contains("iphone")) {
             info.deviceType = "Mobile";
@@ -107,7 +100,7 @@ public class UserLoginLogService {
         } else {
             info.deviceType = "Desktop";
         }
-        
+
         // 브라우저 정보
         if (userAgent.contains("firefox")) {
             info.browserInfo = "Firefox";
@@ -122,7 +115,7 @@ public class UserLoginLogService {
         } else {
             info.browserInfo = "Other";
         }
-        
+
         // OS 정보
         if (userAgent.contains("windows")) {
             info.osInfo = "Windows";
@@ -137,13 +130,13 @@ public class UserLoginLogService {
         } else {
             info.osInfo = "Other";
         }
-        
+
         return info;
     }
-    
+
     private static class DeviceInfo {
         String deviceType = "Unknown";
         String browserInfo = "Unknown";
         String osInfo = "Unknown";
     }
-} 
+}

@@ -14,15 +14,12 @@ import com.evawova.preview.security.FirebaseUserDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +29,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
-    private final PasswordEncoder passwordEncoder;
     private final SubscriptionService subscriptionService;
 
     public List<UserDto> getAllUsers() {
@@ -41,7 +37,7 @@ public class UserService {
         log.info("총 {}명의 사용자 조회 완료", users.size());
         return users.stream()
                 .map(UserDto::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public UserDto getUserById(Long id) {
@@ -124,7 +120,7 @@ public class UserService {
                 })
                 .orElseGet(() -> {
                     log.info("신규 소셜 사용자 생성 시작 (UID: {}).", request.getUid());
-                    Plan freePlan = planRepository.findByType(PlanType.FREE)
+                    Plan freePlan = planRepository.findByPlanType(PlanType.FREE)
                             .orElseThrow(() -> {
                                 log.error("치명적 오류: 소셜 로그인 중 데이터베이스에 Free 플랜이 설정되지 않았습니다.");
                                 return new IllegalStateException("시스템 설정 오류: Free 플랜을 찾을 수 없습니다.");
@@ -135,7 +131,7 @@ public class UserService {
                             request.getEmail(),
                             request.getDisplayName(),
                             request.getProvider());
-                    updateUserRoleBasedOnPlan(newUser, freePlan.getType());
+                    updateUserRoleBasedOnPlan(newUser, freePlan.getPlanType());
 
                     User savedNewUser = userRepository.save(newUser);
                     log.info("New social user created with ID: {}", savedNewUser.getId());
@@ -168,13 +164,13 @@ public class UserService {
                     return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + userId);
                 });
 
-        Plan targetPlan = planRepository.findByType(planType)
+        Plan targetPlan = planRepository.findByPlanType(planType)
                 .orElseThrow(() -> {
                     log.error("Failed to change role for user ID: {}: PlanType {} not found.", userId, planType);
                     return new IllegalArgumentException("존재하지 않는 플랜 타입입니다: " + planType);
                 });
 
-        updateUserRoleBasedOnPlan(user, targetPlan.getType());
+        updateUserRoleBasedOnPlan(user, targetPlan.getPlanType());
 
         log.warn("User role updated for user ID: {}. Actual plan change needs to be handled via SubscriptionService.",
                 userId);
@@ -191,13 +187,13 @@ public class UserService {
                     return new EntityNotFoundException("사용자를 찾을 수 없습니다: " + uid);
                 });
 
-        Plan targetPlan = planRepository.findByType(planType)
+        Plan targetPlan = planRepository.findByPlanType(planType)
                 .orElseThrow(() -> {
                     log.error("Failed to change role for user UID: {}: PlanType {} not found.", uid, planType);
                     return new IllegalArgumentException("존재하지 않는 플랜 타입입니다: " + planType);
                 });
 
-        updateUserRoleBasedOnPlan(user, targetPlan.getType());
+        updateUserRoleBasedOnPlan(user, targetPlan.getPlanType());
 
         log.warn("User role updated for user UID: {}. Actual plan change needs to be handled via SubscriptionService.",
                 uid);
@@ -248,7 +244,7 @@ public class UserService {
             PlanType currentPlanType;
 
             if (activeSubscription != null && activeSubscription.getPlan() != null) {
-                currentPlanType = activeSubscription.getPlan().getType();
+                currentPlanType = activeSubscription.getPlan().getPlanType();
                 log.debug("User ID: {} has active subscription with PlanType: {}", user.getId(), currentPlanType);
             } else {
                 log.warn("User ID: {} has no active subscription. Assuming FREE plan for role migration.",
@@ -291,7 +287,7 @@ public class UserService {
         user.updateAdditionalInfo(
                 updateRequest.getDisplayName(),
                 user.getPhotoUrl(),
-                user.isEmailVerified(),
+                user.getIsEmailVerified(),
                 user.getLastLoginAt());
         log.info("User information updated successfully for UID: {}", uid);
 

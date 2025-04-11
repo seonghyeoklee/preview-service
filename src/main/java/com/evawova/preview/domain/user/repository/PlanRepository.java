@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface PlanRepository extends JpaRepository<Plan, Long> {
-    Optional<Plan> findByType(PlanType type);
-    boolean existsByType(PlanType type);
+    Optional<Plan> findByPlanType(PlanType type);
+    boolean existsByPlanType(PlanType type);
 } 

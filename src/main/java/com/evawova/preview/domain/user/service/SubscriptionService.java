@@ -91,7 +91,7 @@ public class SubscriptionService {
                     return new EntityNotFoundException("플랜을 찾을 수 없습니다: " + planId);
                 });
 
-        if (!plan.isActive()) {
+        if (!plan.getIsActive()) {
             log.error("구독 생성 실패: 비활성화된 플랜 - 플랜 ID: {}", planId);
             throw new IllegalArgumentException("비활성화된 플랜으로는 구독을 생성할 수 없습니다: " + planId);
         }
@@ -202,7 +202,7 @@ public class SubscriptionService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime newEndDate = subscription.getCycle() == Subscription.SubscriptionCycle.MONTHLY
+        LocalDateTime newEndDate = subscription.getSubscriptionCycle() == Subscription.SubscriptionCycle.MONTHLY
                 ? now.plusMonths(1)
                 : now.plusYears(1);
         log.debug("구독 갱신 처리 중: 구독 ID: {}. 새 만료일: {}", subscriptionId, newEndDate);

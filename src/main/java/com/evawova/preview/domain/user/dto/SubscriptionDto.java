@@ -21,8 +21,8 @@ public class SubscriptionDto {
     private LocalDateTime endDate;
     private Subscription.SubscriptionStatus status;
     private BigDecimal paymentAmount;
-    private Subscription.SubscriptionCycle cycle;
-    private boolean active;
+    private Subscription.SubscriptionCycle subscriptionCycle;
+    private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -35,8 +35,8 @@ public class SubscriptionDto {
                 .endDate(subscription.getEndDate())
                 .status(subscription.getStatus())
                 .paymentAmount(subscription.getPaymentAmount())
-                .cycle(subscription.getCycle())
-                .active(subscription.isActive())
+                .subscriptionCycle(subscription.getSubscriptionCycle())
+                .isActive(subscription.isActive())
                 .createdAt(subscription.getCreatedAt())
                 .updatedAt(subscription.getUpdatedAt())
                 .build();

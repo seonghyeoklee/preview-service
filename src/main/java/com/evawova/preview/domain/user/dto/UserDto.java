@@ -1,6 +1,5 @@
 package com.evawova.preview.domain.user.dto;
 
-import com.evawova.preview.domain.user.entity.Plan;
 import com.evawova.preview.domain.user.entity.Subscription;
 import com.evawova.preview.domain.user.entity.User;
 
@@ -19,32 +18,31 @@ public class UserDto {
     private String uid;
     private String email;
     private String displayName;
-    private PlanDto activePlan;
+    private PlanDto plan;
     private User.Provider provider;
     private User.Role role;
-    private boolean active;
+    private Boolean isActive;
     private String photoUrl;
     private Boolean isEmailVerified;
     private LocalDateTime lastLoginAt;
 
     public static UserDto fromEntity(User user) {
-        // Get active subscription and its plan
         Subscription activeSubscription = user.getActiveSubscription();
         PlanDto activePlanDto = (activeSubscription != null && activeSubscription.getPlan() != null)
                 ? PlanDto.fromEntity(activeSubscription.getPlan())
-                : null; // Or provide a default FREE plan DTO if needed
+                : null;
 
         return UserDto.builder()
                 .id(user.getId())
                 .uid(user.getUid())
                 .email(user.getEmail())
                 .displayName(user.getDisplayName())
-                .activePlan(activePlanDto)
+                .plan(activePlanDto)
                 .provider(user.getProvider())
                 .role(user.getRole())
-                .active(user.isActive())
+                .isActive(user.getIsActive())
                 .photoUrl(user.getPhotoUrl())
-                .isEmailVerified(user.isEmailVerified())
+                .isEmailVerified(user.getIsEmailVerified())
                 .lastLoginAt(user.getLastLoginAt())
                 .build();
     }

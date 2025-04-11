@@ -14,20 +14,20 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PlanDto {
     private Long id;
-    private PlanType type;
+    private PlanType planType;
     private Integer monthlyPrice;
     private Integer annualPrice;
     private Integer monthlyTokenLimit;
-    private boolean active;
-    
+    private Boolean isActive;
+
     public static PlanDto fromEntity(Plan plan) {
         return PlanDto.builder()
                 .id(plan.getId())
-                .type(plan.getType())
+                .planType(plan.getPlanType())
                 .monthlyPrice(plan.getMonthlyPrice().intValue())
                 .annualPrice(plan.getAnnualPrice().intValue())
                 .monthlyTokenLimit(plan.getMonthlyTokenLimit())
-                .active(plan.isActive())
+                .isActive(plan.getIsActive())
                 .build();
     }
-} 
+}

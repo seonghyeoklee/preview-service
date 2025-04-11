@@ -82,8 +82,7 @@ class UserServiceTest {
         testUser = User.createUser(
                 "test@example.com",
                 "encoded_password",
-                "Test User",
-                freePlan);
+                "Test User");
 
         socialLoginRequest = new SocialLoginRequest();
         socialLoginRequest.setUid("123456789");
@@ -99,8 +98,8 @@ class UserServiceTest {
     @DisplayName("모든 사용자 조회")
     void getAllUsers() {
         // given
-        User user1 = User.createUser("user1@example.com", "password1", "User 1", freePlan);
-        User user2 = User.createUser("user2@example.com", "password2", "User 2", standardPlan);
+        User user1 = User.createUser("user1@example.com", "password1", "User 1");
+        User user2 = User.createUser("user2@example.com", "password2", "User 2");
         when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
 
         // when
@@ -165,64 +164,18 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 등록 - 성공")
-    void registerUser_Success() {
-        // given
-        String email = "new@example.com";
-        String password = "password";
-        String name = "New User";
-        String encodedPassword = "encoded_password";
-
-        when(userRepository.existsByEmail(email)).thenReturn(false);
-        when(planRepository.findByType(PlanType.FREE)).thenReturn(Optional.of(freePlan));
-        when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        when(userRepository.save(userCaptor.capture())).thenAnswer(invocation -> {
-            User savedUser = userCaptor.getValue();
-            savedUser.getId(); // simulate ID setting (usually done by JPA)
-            return savedUser;
-        });
-
-        // when
-        UserDto userDto = userService.registerUser(email, password, name);
-
-        // then
-        User capturedUser = userCaptor.getValue();
-        assertThat(capturedUser.getEmail()).isEqualTo(email);
-        assertThat(capturedUser.getPassword()).isEqualTo(encodedPassword);
-        assertThat(capturedUser.getDisplayName()).isEqualTo(name);
-        assertThat(capturedUser.getPlan()).isEqualTo(freePlan);
-
-        verify(eventPublisher).publishEvent(any(User.class));
-    }
-
-    @Test
-    @DisplayName("사용자 등록 - 실패 (이미 존재하는 이메일)")
-    void registerUser_Fail_EmailAlreadyExists() {
-        // given
-        String email = "existing@example.com";
-        when(userRepository.existsByEmail(email)).thenReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> userService.registerUser(email, "password", "Name"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("이미 사용 중인 이메일입니다.");
-    }
-
-    @Test
     @DisplayName("플랜 변경 - 성공")
     void changePlan_Success() {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(planRepository.findByType(PlanType.STANDARD)).thenReturn(Optional.of(standardPlan));
+        when(planRepository.findByPlanType(PlanType.STANDARD)).thenReturn(Optional.of(standardPlan));
 
         // when
         UserDto userDto = userService.changePlan(userId, PlanType.STANDARD);
 
         // then
-        assertThat(testUser.getPlan()).isEqualTo(standardPlan);
+        assertThat(testUser.getCurrentPlan()).isEqualTo(standardPlan);
         verify(eventPublisher).publishEvent(testUser);
     }
 
@@ -245,7 +198,7 @@ class UserServiceTest {
         // given
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(planRepository.findByType(PlanType.STANDARD)).thenReturn(Optional.empty());
+        when(planRepository.findByPlanType(PlanType.STANDARD)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> userService.changePlan(userId, PlanType.STANDARD))

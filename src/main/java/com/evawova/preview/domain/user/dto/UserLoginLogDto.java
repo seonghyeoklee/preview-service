@@ -32,8 +32,8 @@ public class UserLoginLogDto {
                 .deviceType(entity.getDeviceType())
                 .browserInfo(entity.getBrowserInfo())
                 .osInfo(entity.getOsInfo())
-                .successful(entity.isSuccessful())
-                .failReason(entity.getFailReason())
+                .successful(entity.getLoginStatus() == UserLoginLog.LoginStatus.SUCCESS)
+                .failReason(entity.getLoginStatus() == UserLoginLog.LoginStatus.FAILURE ? entity.getFailureReason() : null)
                 .loginAt(entity.getLoginAt())
                 .build();
     }

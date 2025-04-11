@@ -66,6 +66,6 @@ public class FirebaseUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user == null || user.isActive();
+        return user == null || user.getIsActive();
     }
 } 

@@ -11,13 +11,9 @@ import java.util.List;
 
 public interface UserLoginLogRepository extends JpaRepository<UserLoginLog, Long> {
     List<UserLoginLog> findByUserOrderByLoginAtDesc(User user);
-    
+
     Page<UserLoginLog> findByUserOrderByLoginAtDesc(User user, Pageable pageable);
-    
-    List<UserLoginLog> findByUserAndSuccessfulIsTrueOrderByLoginAtDesc(User user);
-    
-    List<UserLoginLog> findByUserAndSuccessfulIsFalseOrderByLoginAtDesc(User user);
-    
+
     List<UserLoginLog> findByUserAndLoginAtBetweenOrderByLoginAtDesc(
-        User user, LocalDateTime startDateTime, LocalDateTime endDateTime);
-} 
+            User user, LocalDateTime startDateTime, LocalDateTime endDateTime);
+}

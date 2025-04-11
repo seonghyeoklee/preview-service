@@ -20,7 +20,7 @@ public class PlanService {
     public List<PlanDto> getAllPlans() {
         return planRepository.findAll().stream()
                 .map(PlanDto::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public PlanDto getPlanById(Long id) {
@@ -30,7 +30,7 @@ public class PlanService {
     }
 
     public PlanDto getPlanByType(PlanType type) {
-        return planRepository.findByType(type)
+        return planRepository.findByPlanType(type)
                 .map(PlanDto::fromEntity)
                 .orElseThrow(() -> new IllegalArgumentException("플랜을 찾을 수 없습니다: " + type));
     }

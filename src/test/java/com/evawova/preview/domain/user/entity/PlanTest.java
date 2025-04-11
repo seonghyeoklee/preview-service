@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 
@@ -22,11 +21,11 @@ class PlanTest {
                 true);
 
         // then
-        assertThat(plan.getType()).isEqualTo(PlanType.STANDARD);
+        assertThat(plan.getPlanType()).isEqualTo(PlanType.STANDARD);
         assertThat(plan.getMonthlyPrice()).isEqualTo(9900);
         assertThat(plan.getAnnualPrice()).isEqualTo(99000);
         assertThat(plan.getMonthlyTokenLimit()).isEqualTo(50000);
-        assertThat(plan.isActive()).isTrue();
+        assertThat(plan.getIsActive()).isTrue();
     }
 
     @Test
@@ -49,11 +48,11 @@ class PlanTest {
                 true);
 
         // then
-        assertThat(plan.getType()).isEqualTo(PlanType.PRO);
+        assertThat(plan.getPlanType()).isEqualTo(PlanType.PRO);
         assertThat(plan.getMonthlyPrice()).isEqualTo(19900);
         assertThat(plan.getAnnualPrice()).isEqualTo(199000);
         assertThat(plan.getMonthlyTokenLimit()).isEqualTo(100000);
-        assertThat(plan.isActive()).isTrue();
+        assertThat(plan.getIsActive()).isTrue();
     }
 
     @Test
@@ -71,7 +70,7 @@ class PlanTest {
         plan.deactivate();
 
         // then
-        assertThat(plan.isActive()).isFalse();
+        assertThat(plan.getIsActive()).isFalse();
     }
 
 }

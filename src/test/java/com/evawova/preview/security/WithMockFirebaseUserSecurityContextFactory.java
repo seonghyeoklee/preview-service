@@ -1,7 +1,5 @@
 package com.evawova.preview.security;
 
-import com.evawova.preview.domain.user.entity.Plan;
-import com.evawova.preview.domain.user.entity.PlanType;
 import com.evawova.preview.domain.user.entity.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,7 +8,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 
 public class WithMockFirebaseUserSecurityContextFactory implements WithSecurityContextFactory<WithMockFirebaseUser> {
@@ -23,13 +20,7 @@ public class WithMockFirebaseUserSecurityContextFactory implements WithSecurityC
                 annotation.uid(),
                 annotation.email(),
                 annotation.displayName(),
-                User.Provider.GOOGLE,
-                Plan.createPlan(
-                        PlanType.FREE,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        10000,
-                        true));
+                User.Provider.GOOGLE);
 
         FirebaseUserDetails principal = new FirebaseUserDetails(user);
 

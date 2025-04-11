@@ -9,7 +9,7 @@ public class SubscriptionCreatedEvent extends AbstractDomainEvent {
     private final Long subscriptionId;
     private final Long userId;
     private final Long planId;
-    private final Subscription.SubscriptionCycle cycle;
+    private final Subscription.SubscriptionCycle subscriptionCycle;
     private final String paymentAmount;
 
     public SubscriptionCreatedEvent(Subscription subscription) {
@@ -17,7 +17,7 @@ public class SubscriptionCreatedEvent extends AbstractDomainEvent {
         this.subscriptionId = subscription.getId();
         this.userId = subscription.getUser().getId();
         this.planId = subscription.getPlan().getId();
-        this.cycle = subscription.getCycle();
+        this.subscriptionCycle = subscription.getSubscriptionCycle();
         this.paymentAmount = subscription.getPaymentAmount().toString();
     }
 }
